@@ -1,0 +1,11 @@
+.jumbotron {
+  background: linear-gradient(to right, #2e609a, #141e30);
+}
+
+.border-cyan {
+  border-color: #417892;
+}
+
+.info-text {
+  font-size: 1.2rem;
+}
