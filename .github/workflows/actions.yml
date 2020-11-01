@@ -1,0 +1,17 @@
+name: RSS-feed
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install deps
+        run: make install
+      - name: Start liner
+        run: make lint
