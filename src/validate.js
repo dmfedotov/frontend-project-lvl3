@@ -9,12 +9,6 @@ const schema = yup.object().shape({
 
 const byUrl = (form) => schema.validate(form);
 
-const byData = (data) => {};
-
-const byDuplicate = (url) => {};
-
 export default {
   byUrl,
-  byData,
-  byDuplicate,
 };
