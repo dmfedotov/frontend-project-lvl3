@@ -30,7 +30,7 @@ export default () => {
   const watchedState = watcher(state);
 
   const form = document.querySelector('.rss-form');
-  const submitButton = form.querySelector('button');
+  // const submitButton = form.querySelector('button');
 
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
