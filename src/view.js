@@ -1,12 +1,13 @@
 import onChange from 'on-change';
 
-const inputField = document.querySelector('input');
+// const inputField = document.querySelector('input');
 
-const renderError = (errors) => {
+/* const renderError = (errors) => {
   const error = errors;
 };
+*/
 
-export default (state) => onChange(state, (path, value) => {
+export default (state) => onChange(state, (path) => {
   switch (path) {
     case 'form.processState':
       console.log('state: ', state);
