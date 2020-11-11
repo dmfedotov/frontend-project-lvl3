@@ -4,14 +4,16 @@ import rss from './rss';
 import validate from './validate';
 import watcher from './view';
 
-const updateValidationState = (state) => validate.byUrl(state.form)
+const addRssFeed = (state) => validate.byUrl(state.form)
   .then(({ url }) => validate.byDuplicate(state.feeds, url))
   .then((url) => rss.getData(url))
   .then(() => {
+    state.form.processState = 'finished';
     state.form.valid = true;
-    state.form.errors = [];
+    state.form.error = null;
   })
   .catch((err) => {
+    state.form.processState = 'filling';
     state.form.valid = false;
     state.form.error = err.message;
   });
@@ -31,13 +33,17 @@ export default () => {
   const watchedState = watcher(state);
 
   const form = document.querySelector('.rss-form');
-  // const submitButton = form.querySelector('button');
 
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
     const formData = new FormData(evt.target);
     watchedState.form.url = formData.get('url');
     watchedState.form.processState = 'sending';
-    updateValidationState(watchedState);
+    try {
+      addRssFeed(watchedState);
+    } catch (err) {
+      watchedState.form.processState = 'failed';
+      throw err;
+    }
   });
 };
