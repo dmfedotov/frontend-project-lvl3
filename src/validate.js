@@ -11,11 +11,11 @@ const byUrl = (form) => schema.validate(form);
 
 const byDuplicate = (feeds, url) => {
   const urlMatches = feeds.filter((feed) => feed.url === url);
-  const isUrlExists = urlMatches.length === 0;
-  if (isUrlExists) {
+  const urlExist = urlMatches.length === 0;
+  if (urlExist) {
     return new Promise((resolve) => resolve(url));
   }
-  return new Promise((resolve, reject) => reject(new Error('Rss already exists')));
+  return new Promise((_resolve, reject) => reject(new Error('Rss already exists')));
 };
 
 export default {
