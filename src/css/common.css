@@ -9,3 +9,11 @@
 .info-text {
   font-size: 1.2rem;
 }
+
+.rss-form {
+  padding-bottom: 5px;
+}
+
+.feedback {
+  min-height: 1rem;
+}
