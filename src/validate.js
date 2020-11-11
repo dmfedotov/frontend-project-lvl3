@@ -9,6 +9,16 @@ const schema = yup.object().shape({
 
 const byUrl = (form) => schema.validate(form);
 
+const byDuplicate = (feeds, url) => {
+  const urlMatches = feeds.filter((feed) => feed.url === url);
+  const isUrlExists = urlMatches.length === 0;
+  if (isUrlExists) {
+    return new Promise((resolve) => resolve(url));
+  }
+  return new Promise((resolve, reject) => reject(new Error('Rss already exists')));
+};
+
 export default {
   byUrl,
+  byDuplicate,
 };

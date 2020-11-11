@@ -5,14 +5,15 @@ import validate from './validate';
 import watcher from './view';
 
 const updateValidationState = (state) => validate.byUrl(state.form)
-  .then(({ url }) => rss.getData(url))
+  .then(({ url }) => validate.byDuplicate(state.feeds, url))
+  .then((url) => rss.getData(url))
   .then(() => {
     state.form.valid = true;
     state.form.errors = [];
   })
   .catch((err) => {
-    state.form.error = err.message;
     state.form.valid = false;
+    state.form.error = err.message;
   });
 
 export default () => {
