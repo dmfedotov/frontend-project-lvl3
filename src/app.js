@@ -4,19 +4,25 @@ import rss from './rss';
 import validate from './validate';
 import watcher from './view';
 
-const addRssFeed = (state) => validate.byUrl(state.form)
-  .then(({ url }) => validate.byDuplicate(state.feeds, url))
-  .then((url) => rss.getData(url))
-  .then(() => {
-    state.form.processState = 'finished';
-    state.form.valid = true;
-    state.form.error = null;
-  })
-  .catch((err) => {
-    state.form.processState = 'filling';
-    state.form.valid = false;
-    state.form.error = err.message;
-  });
+const addRssFeed = (state) => {
+  const { url } = state.form;
+  validate.byUrl(state.form)
+    .then(() => validate.byDuplicate(state.feeds, url))
+    .then(rss.getData)
+    .then(validate.byContent)
+    .then((doc) => rss.parse(doc, url))
+    .then((feed) => state.feeds.push(feed))
+    .then(() => {
+      state.form.processState = 'finished';
+      state.form.valid = true;
+      state.form.error = null;
+    })
+    .catch((err) => {
+      state.form.processState = 'filling';
+      state.form.valid = false;
+      state.form.error = err.message;
+    });
+};
 
 export default () => {
   const state = {
