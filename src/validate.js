@@ -2,7 +2,7 @@ import * as yup from 'yup';
 
 const schema = yup.object().shape({
   url: yup.string()
-    .matches(/^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/,
+    .matches(/^(https?):\/\/[^\s$.?#].[^\s]*$/,
       'Must be valid url')
     .required('Please enter rss'),
 });
