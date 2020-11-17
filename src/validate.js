@@ -18,7 +18,19 @@ const byDuplicate = (feeds, url) => {
   return new Promise((_resolve, reject) => reject(new Error('Rss already exists')));
 };
 
+const byContent = (content) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(content, 'application/xml');
+  const isRss = doc.querySelector('rss');
+
+  if (isRss) {
+    return new Promise((resolve) => resolve(doc));
+  }
+  return new Promise((_resolve, reject) => reject(new Error('This source doesn\'t contain valid rss')));
+};
+
 export default {
   byUrl,
   byDuplicate,
+  byContent,
 };
