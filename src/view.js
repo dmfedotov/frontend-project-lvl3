@@ -106,7 +106,8 @@ const renderFeed = (feeds) => {
   const feedsList = container.querySelector('.feeds-list');
   const postsList = container.querySelector('.posts-list');
 
-  feeds.forEach((feed) => {
+  const reversedFeeds = feeds.reverse();
+  reversedFeeds.forEach((feed) => {
     const title = document.createElement('h3');
     title.textContent = feed.title;
     const description = document.createElement('p');
