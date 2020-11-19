@@ -106,8 +106,7 @@ const renderFeed = (feeds) => {
   const feedsList = container.querySelector('.feeds-list');
   const postsList = container.querySelector('.posts-list');
 
-  const reversedFeeds = feeds.reverse();
-  reversedFeeds.forEach((feed) => {
+  feeds.forEach((feed) => {
     const title = document.createElement('h3');
     title.textContent = feed.title;
     const description = document.createElement('p');
@@ -127,6 +126,7 @@ export default (state) => onChange(state, (path, value) => {
   switch (path) {
     case 'form.processState':
       formProcessStateHandler(value);
+      console.log(state.feeds);
       break;
     case 'form.valid':
       break;

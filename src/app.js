@@ -11,7 +11,7 @@ const addRssFeed = (state) => {
     .then(rss.getData)
     .then(validate.byContent)
     .then((doc) => rss.parse(doc, url))
-    .then((feed) => state.feeds.push(feed))
+    .then((feed) => state.feeds.unshift(feed))
     .then(() => {
       state.form.processState = 'finished';
       state.form.valid = true;
