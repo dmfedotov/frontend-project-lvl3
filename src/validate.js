@@ -10,8 +10,7 @@ const byUrl = (form) => schema.validate(form);
 
 const byDuplicate = (feeds, url) => {
   const urlMatches = feeds.filter((feed) => feed.url === url);
-  const urlExist = urlMatches.length === 0;
-  if (urlExist) {
+  if (urlMatches.length === 0) {
     return new Promise((resolve) => resolve(url));
   }
   return new Promise((_resolve, reject) => reject(new Error(i18next.t('errors.duplicate'))));
