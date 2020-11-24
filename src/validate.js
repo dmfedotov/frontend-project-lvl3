@@ -1,10 +1,9 @@
+import i18next from 'i18next';
 import * as yup from 'yup';
 
 const schema = yup.object().shape({
   url: yup.string()
-    .matches(/^(https?):\/\/[^\s$.?#].[^\s]*$/,
-      'Must be valid url')
-    .required('Please enter rss'),
+    .matches(/^(https?):\/\/[^\s$.?#].[^\s]*$/, 'Must be valid url'),
 });
 
 const byUrl = (form) => schema.validate(form);
@@ -15,7 +14,7 @@ const byDuplicate = (feeds, url) => {
   if (urlExist) {
     return new Promise((resolve) => resolve(url));
   }
-  return new Promise((_resolve, reject) => reject(new Error('Rss already exists')));
+  return new Promise((_resolve, reject) => reject(new Error(i18next.t('errors.duplicate'))));
 };
 
 const byContent = (content) => {
@@ -26,7 +25,7 @@ const byContent = (content) => {
   if (isRss) {
     return new Promise((resolve) => resolve(doc));
   }
-  return new Promise((_resolve, reject) => reject(new Error('This source doesn\'t contain valid rss')));
+  return new Promise((_resolve, reject) => reject(new Error(i18next.t('errors.invalidContent'))));
 };
 
 export default {

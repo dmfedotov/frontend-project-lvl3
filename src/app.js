@@ -1,6 +1,8 @@
 /* eslint-disable no-param-reassign  */
 
+import i18next from 'i18next';
 import rss from './rss';
+import resources from './locales';
 import validate from './validate';
 import watcher from './view';
 
@@ -24,7 +26,12 @@ const addRssFeed = (state) => {
     });
 };
 
-export default () => {
+export default async () => {
+  await i18next.init({
+    lng: 'en',
+    resources,
+  });
+
   const state = {
     form: {
       processState: 'filling',

@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import i18next from 'i18next';
 
 const inputField = document.querySelector('input');
 const submitButton = document.querySelector('button');
@@ -6,7 +7,7 @@ const feedback = document.querySelector('.feedback');
 
 const renderSuccess = () => {
   feedback.classList.add('text-success');
-  feedback.textContent = 'Rss has been loaded';
+  feedback.textContent = i18next.t('successMessage');
 };
 
 const renderError = (error) => {
@@ -64,9 +65,9 @@ const createLayout = () => {
   postsWrapper.classList.add('col-md-10', 'mx-auto');
 
   const feedsTitle = document.createElement('h2');
-  feedsTitle.textContent = 'Feeds';
+  feedsTitle.textContent = i18next.t('titles.feeds');
   const postsTitle = document.createElement('h2');
-  postsTitle.textContent = 'Posts';
+  postsTitle.textContent = i18next.t('titles.posts');
 
   const feedsList = document.createElement('ul');
   const postsList = document.createElement('ul');
@@ -126,7 +127,6 @@ export default (state) => onChange(state, (path, value) => {
   switch (path) {
     case 'form.processState':
       formProcessStateHandler(value);
-      console.log(state.feeds);
       break;
     case 'form.valid':
       break;
