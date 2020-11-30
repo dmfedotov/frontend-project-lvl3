@@ -10,10 +10,13 @@ const byUrl = (form) => schema.validate(form);
 
 const byDuplicate = (feeds, url) => {
   const urlMatches = feeds.filter((feed) => feed.url === url);
-  if (urlMatches.length === 0) {
-    return new Promise((resolve) => resolve(url));
-  }
-  return new Promise((_resolve, reject) => reject(new Error(i18next.t('errors.duplicate'))));
+  return new Promise((resolve, reject) => {
+    if (urlMatches.length === 0) {
+      resolve(url);
+      return;
+    }
+    reject(new Error(i18next.t('errors.duplicate')));
+  });
 };
 
 const byContent = (content) => {
