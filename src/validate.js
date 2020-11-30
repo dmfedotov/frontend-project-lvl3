@@ -24,10 +24,13 @@ const byContent = (content) => {
   const doc = parser.parseFromString(content, 'application/xml');
   const isRss = doc.querySelector('rss');
 
-  if (isRss) {
-    return new Promise((resolve) => resolve(doc));
-  }
-  return new Promise((_resolve, reject) => reject(new Error(i18next.t('errors.invalidContent'))));
+  return new Promise((resolve, reject) => {
+    if (isRss) {
+      resolve(doc);
+      return;
+    }
+    reject(new Error(i18next.t('errors.invalidContent')));
+  });
 };
 
 export default {
