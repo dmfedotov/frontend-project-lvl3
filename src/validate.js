@@ -19,9 +19,7 @@ const byDuplicate = (feeds, url) => {
   });
 };
 
-const byContent = (content) => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(content, 'application/xml');
+const byContent = (doc) => {
   const isRss = doc.querySelector('rss');
 
   return new Promise((resolve, reject) => {
