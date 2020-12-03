@@ -52,11 +52,6 @@ export default async () => {
     const formData = new FormData(evt.target);
     watchedState.form.url = formData.get('url');
     watchedState.form.processState = 'sending';
-    try {
-      addRssFeed(watchedState);
-    } catch (err) {
-      watchedState.form.processState = 'failed';
-      throw err;
-    }
+    addRssFeed(watchedState);
   });
 };
