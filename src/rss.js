@@ -14,8 +14,9 @@ const parse = (content) => new Promise((resolve) => {
 });
 
 const generatePostId = (index) => index + 1;
+const generateFeedId = () => Number(uniqueId());
 
-const buildFeed = (doc, url, feedId = uniqueId()) => {
+const buildFeed = (doc, url, feedId = generateFeedId()) => {
   const promise = Promise.resolve();
   return promise
     .then(() => {
