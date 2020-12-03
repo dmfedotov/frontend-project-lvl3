@@ -8,11 +8,12 @@ import watcher from './view';
 
 const addRssFeed = (state) => {
   const { url } = state.form;
-  validate.byUrl(state.form)
+  return validate.byUrl(state.form)
     .then(() => validate.byDuplicate(state.feeds, url))
     .then(rss.getData)
+    .then(rss.parse)
     .then(validate.byContent)
-    .then((doc) => rss.parse(doc, url))
+    .then((doc) => rss.buildFeed(doc, url))
     .then((feed) => state.feeds.unshift(feed))
     .then(() => {
       state.form.processState = 'finished';

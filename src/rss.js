@@ -7,13 +7,18 @@ const getData = (url) => axios({
   timeout: 5000,
 }).then((response) => response.data.contents);
 
+const parse = (content) => new Promise((resolve) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(content, 'application/xml');
+  resolve(doc);
+});
+
 const generatePostId = (index) => index + 1;
 
-const parse = (doc, url) => {
+const buildFeed = (doc, url, feedId = uniqueId()) => {
   const promise = Promise.resolve();
   return promise
     .then(() => {
-      const feedId = uniqueId();
       const channelElem = doc.querySelector('rss channel');
       const title = channelElem.querySelector('title').textContent;
       const description = channelElem.querySelector('description').textContent;
@@ -42,4 +47,5 @@ const parse = (doc, url) => {
 export default {
   getData,
   parse,
+  buildFeed,
 };
