@@ -17,12 +17,13 @@ const addRssFeed = (state) => {
     .then(() => {
       state.form.processState = 'finished';
       state.form.valid = true;
-      state.form.error = null;
+      state.form.processError = null;
+    })
     })
     .catch((err) => {
-      state.form.processState = 'filling';
+      state.form.processState = 'failed';
       state.form.valid = false;
-      state.form.error = err.message;
+      state.form.processError = err.message;
     });
 };
 
@@ -38,7 +39,6 @@ export default async () => {
       processError: null,
       url: '',
       valid: true,
-      error: null,
     },
     feeds: [],
   };

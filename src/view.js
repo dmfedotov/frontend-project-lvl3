@@ -130,8 +130,8 @@ export default (state) => onChange(state, (path, value) => {
       break;
     case 'form.valid':
       break;
-    case 'form.error':
-      renderError(state.form.error);
+    case 'form.processError':
+      renderError(state.form.processError);
       break;
     case 'feeds':
       renderFeed(state.feeds);
