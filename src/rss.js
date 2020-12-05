@@ -29,6 +29,7 @@ const buildFeed = (doc, url, feedId = generateFeedId()) => {
         id: generatePostId(index),
         title: elem.querySelector('title').textContent,
         link: elem.querySelector('link').textContent,
+        pubDate: elem.querySelector('pubDate').textContent,
       }));
 
       return {
