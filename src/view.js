@@ -61,8 +61,8 @@ const createLayout = () => {
 
   const feedsWrapper = document.createElement('div');
   const postsWrapper = document.createElement('div');
-  feedsWrapper.classList.add('col-md-10', 'mx-auto');
-  postsWrapper.classList.add('col-md-10', 'mx-auto');
+  feedsWrapper.classList.add('col-md-10', 'col-lg-8', 'mx-auto');
+  postsWrapper.classList.add('col-md-10', 'col-lg-8', 'mx-auto');
 
   const feedsTitle = document.createElement('h2');
   feedsTitle.textContent = i18next.t('titles.feeds');
@@ -71,8 +71,8 @@ const createLayout = () => {
 
   const feedsList = document.createElement('ul');
   const postsList = document.createElement('ul');
-  feedsList.classList.add('list-group-5', 'feeds-list');
-  postsList.classList.add('list-group-5', 'posts-list');
+  feedsList.classList.add('list-group', 'mb-5', 'feeds-list');
+  postsList.classList.add('list-group', 'mb-5', 'posts-list');
 
   feedsWrapper.append(feedsTitle, feedsList);
   postsWrapper.append(postsTitle, postsList);
