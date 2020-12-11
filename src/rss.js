@@ -2,14 +2,15 @@ import i18next from 'i18next';
 import axios from 'axios';
 import { uniqueId } from 'lodash';
 
+const cors = 'https://cors-anywhere.herokuapp.com/';
 const getData = (url) => axios({
-  url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url: `${cors}${url}`,
   timeout: 5000,
-}).then((response) => response.data.contents);
+}).then((response) => response.data);
 
-const parse = (content) => new Promise((resolve) => {
+const parse = (data) => new Promise((resolve) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(content, 'application/xml');
+  const doc = parser.parseFromString(data, 'application/xml');
   resolve(doc);
 });
 
