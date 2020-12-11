@@ -14,8 +14,8 @@ const parse = (data) => new Promise((resolve) => {
   resolve(doc);
 });
 
-const generatePostId = (index) => index + 1;
 const generateFeedId = () => Number(uniqueId());
+const generatePostId = (length, index) => length - index;
 
 const buildFeed = (doc, url, feedId = generateFeedId()) => {
   const promise = Promise.resolve();
@@ -25,9 +25,9 @@ const buildFeed = (doc, url, feedId = generateFeedId()) => {
       const title = channelElem.querySelector('title').textContent;
       const description = channelElem.querySelector('description').textContent;
       const postElems = channelElem.querySelectorAll('item');
-      const posts = Array.from(postElems).map((elem, index) => ({
+      const posts = Array.from(postElems).map((elem, index, arr) => ({
         feedId,
-        id: generatePostId(index),
+        id: generatePostId(arr.length, index),
         title: elem.querySelector('title').textContent,
         link: elem.querySelector('link').textContent,
         pubDate: elem.querySelector('pubDate').textContent,
