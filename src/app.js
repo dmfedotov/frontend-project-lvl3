@@ -20,6 +20,9 @@ const addRssFeed = (state) => {
       state.form.valid = true;
       state.form.processError = null;
     })
+    .then(() => {
+      clearTimeout(state.updateTimer);
+      state.updateTimer = setTimeout(() => rss.updateFeeds(state), 5000);
     })
     .catch((err) => {
       state.form.processState = 'failed';
@@ -42,6 +45,8 @@ export default async () => {
       valid: true,
     },
     feeds: [],
+    updatedPosts: [],
+    updateTimer: 0,
   };
 
   const watchedState = watcher(state);
@@ -53,6 +58,7 @@ export default async () => {
     const formData = new FormData(evt.target);
     watchedState.form.url = formData.get('url');
     watchedState.form.processState = 'sending';
+    watchedState.form.processError = null;
     addRssFeed(watchedState);
   });
 };

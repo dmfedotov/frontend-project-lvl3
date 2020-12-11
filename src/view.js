@@ -90,6 +90,7 @@ const renderPost = (list, posts) => {
     const link = document.createElement('a');
     link.textContent = post.title;
     link.href = post.link;
+    link.setAttribute('data-id', post.id);
     li.append(link);
     list.append(li);
   });
@@ -123,6 +124,13 @@ const renderFeed = (feeds) => {
   mainElem.append(container);
 };
 
+const renderUpdates = (posts) => {
+  const fragment = document.createDocumentFragment();
+  const postsListElem = document.querySelector('.posts-list');
+  renderPost(fragment, posts);
+  postsListElem.prepend(fragment);
+};
+
 export default (state) => onChange(state, (path, value) => {
   switch (path) {
     case 'form.processState':
@@ -135,6 +143,9 @@ export default (state) => onChange(state, (path, value) => {
       break;
     case 'feeds':
       renderFeed(state.feeds);
+      break;
+    case 'updatedPosts':
+      renderUpdates(state.updatedPosts);
       break;
     default:
       break;

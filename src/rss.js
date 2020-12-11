@@ -1,6 +1,8 @@
+/* eslint-disable no-param-reassign */
+
 import i18next from 'i18next';
 import axios from 'axios';
-import { uniqueId } from 'lodash';
+import { uniqueId, max } from 'lodash';
 
 const cors = 'https://cors-anywhere.herokuapp.com/';
 const getData = (url) => axios({
@@ -47,8 +49,66 @@ const buildFeed = (doc, url, feedId = generateFeedId()) => {
     });
 };
 
+const getLastDate = (posts) => {
+  const parsedDates = posts.map(({ pubDate }) => Date.parse(pubDate));
+  return max(parsedDates);
+};
+
+const checkForNewPosts = (currentFeeds, updatedFeeds, state) => {
+  const result = [];
+  currentFeeds.forEach((feed, index) => {
+    const { posts: currentPosts } = feed;
+    const { posts: updatedPosts } = updatedFeeds[index];
+    const lastPubDate = (
+      state.updatedPosts.length === 0 ? getLastDate(currentPosts) : getLastDate(state.updatedPosts)
+    );
+    const newPosts = updatedPosts.filter(({ pubDate }) => Date.parse(pubDate) > lastPubDate);
+    result.push(...newPosts);
+  });
+
+  if (result.length !== 0) {
+    state.updatedPosts = result;
+  }
+};
+
+const processUpdates = (data, state) => {
+  const promises = data.map(({ content, url }, index, arr) => {
+    const feedId = arr.length - index;
+    const parsedData = parse(content);
+    return parsedData.then((doc) => buildFeed(doc, url, feedId));
+  });
+  const promise = Promise.all(promises);
+  promise.then((newFeeds) => checkForNewPosts(state.feeds, newFeeds, state));
+};
+
+const updateFeeds = (state) => {
+  const urls = state.feeds.map(({ url }) => url);
+  const promises = urls.map(getData);
+  const promise = Promise.all(promises);
+
+  return promise
+    .then((contents) => {
+      clearTimeout(state.updateTimer);
+      state.updateTimer = setTimeout(() => {
+        updateFeeds(state);
+      }, 5000);
+
+      const data = contents
+        .map((content, index) => ({ content, url: urls[index] }));
+      processUpdates(data, state);
+    })
+    .catch((err) => {
+      console.log(err);
+      clearTimeout(state.updateTimer);
+      state.updateTimer = setTimeout(() => {
+        updateFeeds(state);
+      }, 5000);
+    });
+};
+
 export default {
   getData,
   parse,
   buildFeed,
+  updateFeeds,
 };
