@@ -16,10 +16,9 @@ const parse = (data) => new Promise((resolve) => {
   resolve(doc);
 });
 
-const generateFeedId = () => Number(uniqueId());
-const generatePostId = (length, index) => length - index;
+const generatePostId = (length, index) => String(length - index);
 
-const buildFeed = (doc, url, feedId = generateFeedId()) => {
+const buildFeed = (doc, url, feedId = uniqueId()) => {
   const promise = Promise.resolve();
   return promise
     .then(() => {
