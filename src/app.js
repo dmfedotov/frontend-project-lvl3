@@ -45,7 +45,6 @@ export default async () => {
       valid: true,
     },
     feeds: [],
-    updatedPosts: [],
     updateTimer: 0,
   };
 

@@ -118,17 +118,10 @@ const renderFeed = (feeds) => {
     li.append(title, description);
     feedsList.append(li);
 
-    renderPost(postsList, feed.posts);
+    renderPost(postsList, feed.posts, feed.id);
   });
 
   mainElem.append(container);
-};
-
-const renderUpdates = (posts) => {
-  const fragment = document.createDocumentFragment();
-  const postsListElem = document.querySelector('.posts-list');
-  renderPost(fragment, posts);
-  postsListElem.prepend(fragment);
 };
 
 export default (state) => onChange(state, (path, value) => {
