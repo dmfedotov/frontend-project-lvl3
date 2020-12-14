@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 
-import $ from 'jquery';
 import onChange from 'on-change';
 import i18next from 'i18next';
 
@@ -98,17 +97,13 @@ const createModalButton = (feedId, postId) => {
   return button;
 };
 
-const modalHandler = (state) => {
-  $('#modal').on('show.bs.modal', ({ relatedTarget }) => {
-    const { feedId } = relatedTarget.dataset;
-    const { postId } = relatedTarget.dataset;
-    const [clickedPost] = state.feeds
-      .flatMap(({ posts }) => posts)
-      .filter((post) => (post.feedId === feedId && post.id === postId));
-    $('.modal-title').text(clickedPost.title);
-    $('.modal-body').text(clickedPost.description);
-    $('.full-article').attr('href', clickedPost.link);
-  });
+const renderModal = (data) => {
+  const title = document.querySelector('.modal-title');
+  const desc = document.querySelector('.modal-body');
+  const link = document.querySelector('.full-article');
+  title.textContent = data.title;
+  desc.textContent = data.description;
+  link.href = data.link;
 };
 
 const renderPost = (list, posts, feedId) => {
@@ -165,7 +160,9 @@ export default (state) => onChange(state, (path, value) => {
       break;
     case 'feeds':
       renderFeed(state.feeds);
-      modalHandler(state);
+      break;
+    case 'modalData':
+      renderModal(state.modalData);
       break;
     default:
       break;
