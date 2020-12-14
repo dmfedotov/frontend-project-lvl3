@@ -1,8 +1,11 @@
+/* eslint-disable no-param-reassign */
+
+import $ from 'jquery';
 import onChange from 'on-change';
 import i18next from 'i18next';
 
 const inputField = document.querySelector('input');
-const submitButton = document.querySelector('button');
+const submitButton = document.querySelector('button[type="submit"]');
 const feedback = document.querySelector('.feedback');
 
 const renderSuccess = () => {
@@ -83,15 +86,41 @@ const createLayout = () => {
   return container;
 };
 
-const renderPost = (list, posts) => {
+const createModalButton = (feedId, postId) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.classList.add('btn', 'btn-primary', 'btn-sm');
+  button.setAttribute('data-toggle', 'modal');
+  button.setAttribute('data-target', '#modal');
+  button.setAttribute('data-feed-id', feedId);
+  button.setAttribute('data-post-id', postId);
+  button.textContent = 'Preview';
+  return button;
+};
+
+const modalHandler = (state) => {
+  $('#modal').on('show.bs.modal', ({ relatedTarget }) => {
+    const { feedId } = relatedTarget.dataset;
+    const { postId } = relatedTarget.dataset;
+    const [clickedPost] = state.feeds
+      .flatMap(({ posts }) => posts)
+      .filter((post) => (post.feedId === feedId && post.id === postId));
+    $('.modal-title').text(clickedPost.title);
+    $('.modal-body').text(clickedPost.description);
+    $('.full-article').attr('href', clickedPost.link);
+  });
+};
+
+const renderPost = (list, posts, feedId) => {
   posts.forEach((post) => {
     const li = document.createElement('li');
-    li.classList.add('list-group-item');
+    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
     const link = document.createElement('a');
     link.textContent = post.title;
     link.href = post.link;
     link.setAttribute('data-id', post.id);
-    li.append(link);
+    const modalButton = createModalButton(feedId, post.id);
+    li.append(link, modalButton);
     list.append(li);
   });
 };
@@ -136,9 +165,7 @@ export default (state) => onChange(state, (path, value) => {
       break;
     case 'feeds':
       renderFeed(state.feeds);
-      break;
-    case 'updatedPosts':
-      renderUpdates(state.updatedPosts);
+      modalHandler(state);
       break;
     default:
       break;

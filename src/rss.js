@@ -54,7 +54,7 @@ const buildFeed = (doc, url, feedId = uniqueId()) => {
 
 const processUpdates = (data, state) => {
   const promises = data.map(({ content, url }, index, arr) => {
-    const feedId = arr.length - index;
+    const feedId = String(arr.length - index);
     const parsedData = parse(content);
     return parsedData.then((doc) => buildFeed(doc, url, feedId));
   });
