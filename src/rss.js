@@ -4,9 +4,7 @@ import i18next from 'i18next';
 import axios from 'axios';
 import { uniqueId, differenceBy } from 'lodash';
 
-const cors = 'https://cors-anywhere.herokuapp.com/';
 const getData = (url) => axios({
-  //  url: `${cors}${url}`,
   url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
   timeout: 5000,
 }).then((response) => response.data.contents);
