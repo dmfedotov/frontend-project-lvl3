@@ -6,9 +6,10 @@ import { uniqueId, differenceBy } from 'lodash';
 
 const cors = 'https://cors-anywhere.herokuapp.com/';
 const getData = (url) => axios({
-  url: `${cors}${url}`,
+  //  url: `${cors}${url}`,
+  url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
   timeout: 5000,
-}).then((response) => response.data);
+}).then((response) => response.data.contents);
 
 const parse = (data) => new Promise((resolve) => {
   const parser = new DOMParser();
@@ -23,6 +24,26 @@ const findNewPosts = (currentFeeds, updatedFeed, feedId) => {
   const [currentFeed] = currentFeeds.filter((feed) => feed.id === feedId);
   const { posts: currentPosts } = currentFeed;
   return differenceBy(updatedPosts, currentPosts, 'title');
+};
+
+const isPostRead = (postTitle, readPosts) => {
+  const readPostsTitles = readPosts.map(({ title }) => title);
+  const isRead = readPostsTitles.includes(postTitle);
+  return isRead;
+};
+
+const processPosts = (state, feed, feedId) => {
+  const newPosts = findNewPosts(state.feeds, feed, feedId);
+  state.updatedData.push(...newPosts);
+  const titles = state.updatedData.map((post) => post.title);
+  feed.posts.forEach((post) => {
+    const isNew = titles.includes(post.title);
+    post.read = isPostRead(post.title, state.readPosts);
+    if (isNew) {
+      post.status = 'new';
+    }
+    return post;
+  });
 };
 
 const buildFeed = (doc, url, feedId = uniqueId(), status = 'adding', state) => {
@@ -41,8 +62,8 @@ const buildFeed = (doc, url, feedId = uniqueId(), status = 'adding', state) => {
           title: elem.querySelector('title').textContent,
           description: postDesc,
           link: elem.querySelector('link').textContent,
-          status: 'added',
           pubDate: elem.querySelector('pubDate').textContent,
+          read: false,
         };
       });
 
@@ -55,16 +76,7 @@ const buildFeed = (doc, url, feedId = uniqueId(), status = 'adding', state) => {
       };
 
       if (status === 'updating') {
-        const newPosts = findNewPosts(state.feeds, feed, feedId);
-        state.updatedData.push(...newPosts);
-        const titles = state.updatedData.map((post) => post.title);
-        feed.posts.forEach((post) => {
-          const isNew = titles.includes(post.title);
-          if (isNew) {
-            post.status = 'new';
-          }
-          return post;
-        });
+        processPosts(state, feed, feedId);
       }
       return feed;
     })

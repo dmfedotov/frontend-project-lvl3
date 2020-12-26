@@ -49,6 +49,7 @@ export default async () => {
     updatedData: [],
     updateTimer: 0,
     modalData: {},
+    readPosts: [],
   };
 
   const watchedState = watcher(state);
@@ -80,5 +81,14 @@ export default async () => {
       description: clickedPost.description,
       link: clickedPost.link,
     };
+  });
+
+  const feedContainer = document.querySelector('.feed-container');
+  feedContainer.addEventListener('click', ({ target }) => {
+    if (target.tagName === 'A' || target.tagName === 'BUTTON') {
+      const clickedPost = getClickedPost(target);
+      clickedPost.read = true;
+      watchedState.readPosts.push(clickedPost);
+    }
   });
 };

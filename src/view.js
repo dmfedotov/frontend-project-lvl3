@@ -97,7 +97,9 @@ const renderPost = (list, posts, feedId) => {
   }
 
   posts.forEach((post) => {
+    const fontWeight = post.read ? 'normal' : 'bold';
     const li = document.createElement('li');
+    li.style.fontWeight = fontWeight;
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
     const link = document.createElement('a');
     link.textContent = post.title;
@@ -150,7 +152,7 @@ const renderFeed = (feeds) => {
 export default (state) => onChange(state, (path, value) => {
   const lastPartPath = last(path.split('.'));
 
-  if (lastPartPath === 'status') {
+  if (lastPartPath === 'read') {
     renderFeed(state.feeds);
   }
 
