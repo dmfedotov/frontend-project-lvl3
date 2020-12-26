@@ -46,6 +46,7 @@ export default async () => {
       valid: true,
     },
     feeds: [],
+    updatedData: [],
     updateTimer: 0,
     modalData: {},
   };

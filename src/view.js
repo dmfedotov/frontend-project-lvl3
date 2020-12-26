@@ -2,6 +2,7 @@
 
 import onChange from 'on-change';
 import i18next from 'i18next';
+import { last } from 'lodash';
 
 const inputField = document.querySelector('input');
 const submitButton = document.querySelector('button[type="submit"]');
@@ -52,39 +53,6 @@ const formProcessStateHandler = (processState) => {
   }
 };
 
-const createLayout = () => {
-  const container = document.createElement('div');
-  container.classList.add('container-xl', 'feed-container');
-
-  const feedsBlock = document.createElement('div');
-  const postsBlock = document.createElement('div');
-  feedsBlock.classList.add('row');
-  postsBlock.classList.add('row');
-
-  const feedsWrapper = document.createElement('div');
-  const postsWrapper = document.createElement('div');
-  feedsWrapper.classList.add('col-md-10', 'col-lg-8', 'mx-auto');
-  postsWrapper.classList.add('col-md-10', 'col-lg-8', 'mx-auto');
-
-  const feedsTitle = document.createElement('h2');
-  feedsTitle.textContent = i18next.t('titles.feeds');
-  const postsTitle = document.createElement('h2');
-  postsTitle.textContent = i18next.t('titles.posts');
-
-  const feedsList = document.createElement('ul');
-  const postsList = document.createElement('ul');
-  feedsList.classList.add('list-group', 'mb-5', 'feeds-list');
-  postsList.classList.add('list-group', 'mb-5', 'posts-list');
-
-  feedsWrapper.append(feedsTitle, feedsList);
-  postsWrapper.append(postsTitle, postsList);
-  feedsBlock.append(feedsWrapper);
-  postsBlock.append(postsWrapper);
-  container.append(feedsBlock, postsBlock);
-
-  return container;
-};
-
 const createModalButton = (feedId, postId) => {
   const button = document.createElement('button');
   button.type = 'button';
@@ -106,31 +74,63 @@ const renderModal = (data) => {
   link.href = data.link;
 };
 
+const buildList = (name) => {
+  const listElem = document.querySelector(`.${name}`);
+  if (listElem) {
+    listElem.remove();
+  }
+
+  const list = document.createElement('ul');
+  list.classList.add('list-group', 'mb-5', name);
+  return list;
+};
+
+const newPosts = document.createDocumentFragment();
 const renderPost = (list, posts, feedId) => {
+  const postsContainerElem = document.querySelector('.posts');
+  const titleElem = postsContainerElem.querySelector('h2');
+
+  if (!titleElem) {
+    const postsTitle = document.createElement('h2');
+    postsTitle.textContent = i18next.t('titles.posts');
+    postsContainerElem.append(postsTitle);
+  }
+
   posts.forEach((post) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
     const link = document.createElement('a');
     link.textContent = post.title;
     link.href = post.link;
-    link.setAttribute('data-id', post.id);
+    link.setAttribute('data-feed-id', post.feedId);
+    link.setAttribute('data-post-id', post.id);
     const modalButton = createModalButton(feedId, post.id);
     li.append(link, modalButton);
+
+    if (post.status === 'new') {
+      newPosts.append(li);
+      return;
+    }
+
     list.append(li);
   });
+
+  list.prepend(newPosts);
+  postsContainerElem.append(list);
 };
 
 const renderFeed = (feeds) => {
-  const mainElem = document.querySelector('main');
-  const containerElem = mainElem.querySelector('.feed-container');
+  const feedsContainerElem = document.querySelector('.feeds');
+  const titleElem = feedsContainerElem.querySelector('h2');
 
-  if (containerElem) {
-    containerElem.remove();
+  if (!titleElem) {
+    const feedsTitle = document.createElement('h2');
+    feedsTitle.textContent = i18next.t('titles.feeds');
+    feedsContainerElem.append(feedsTitle);
   }
 
-  const container = createLayout();
-  const feedsList = container.querySelector('.feeds-list');
-  const postsList = container.querySelector('.posts-list');
+  const feedsList = buildList('feeds-list');
+  const postsList = buildList('posts-list');
 
   feeds.forEach((feed) => {
     const title = document.createElement('h3');
@@ -141,14 +141,19 @@ const renderFeed = (feeds) => {
     li.classList.add('list-group-item');
     li.append(title, description);
     feedsList.append(li);
-
     renderPost(postsList, feed.posts, feed.id);
   });
 
-  mainElem.append(container);
+  feedsContainerElem.append(feedsList);
 };
 
 export default (state) => onChange(state, (path, value) => {
+  const lastPartPath = last(path.split('.'));
+
+  if (lastPartPath === 'status') {
+    renderFeed(state.feeds);
+  }
+
   switch (path) {
     case 'form.processState':
       formProcessStateHandler(value);

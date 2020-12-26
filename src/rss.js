@@ -2,7 +2,7 @@
 
 import i18next from 'i18next';
 import axios from 'axios';
-import { uniqueId } from 'lodash';
+import { uniqueId, differenceBy } from 'lodash';
 
 const cors = 'https://cors-anywhere.herokuapp.com/';
 const getData = (url) => axios({
@@ -18,7 +18,14 @@ const parse = (data) => new Promise((resolve) => {
 
 const generatePostId = (length, index) => String(length - index);
 
-const buildFeed = (doc, url, feedId = uniqueId()) => {
+const findNewPosts = (currentFeeds, updatedFeed, feedId) => {
+  const { posts: updatedPosts } = updatedFeed;
+  const [currentFeed] = currentFeeds.filter((feed) => feed.id === feedId);
+  const { posts: currentPosts } = currentFeed;
+  return differenceBy(updatedPosts, currentPosts, 'title');
+};
+
+const buildFeed = (doc, url, feedId = uniqueId(), status = 'adding', state) => {
   const promise = Promise.resolve();
   return promise
     .then(() => {
@@ -34,17 +41,32 @@ const buildFeed = (doc, url, feedId = uniqueId()) => {
           title: elem.querySelector('title').textContent,
           description: postDesc,
           link: elem.querySelector('link').textContent,
+          status: 'added',
           pubDate: elem.querySelector('pubDate').textContent,
         };
       });
 
-      return {
+      const feed = {
         url,
         title,
         feedDesc,
         posts,
         id: feedId,
       };
+
+      if (status === 'updating') {
+        const newPosts = findNewPosts(state.feeds, feed, feedId);
+        state.updatedData.push(...newPosts);
+        const titles = state.updatedData.map((post) => post.title);
+        feed.posts.forEach((post) => {
+          const isNew = titles.includes(post.title);
+          if (isNew) {
+            post.status = 'new';
+          }
+          return post;
+        });
+      }
+      return feed;
     })
     .catch((err) => {
       console.log(err);
@@ -56,7 +78,7 @@ const processUpdates = (data, state) => {
   const promises = data.map(({ content, url }, index, arr) => {
     const feedId = String(arr.length - index);
     const parsedData = parse(content);
-    return parsedData.then((doc) => buildFeed(doc, url, feedId));
+    return parsedData.then((doc) => buildFeed(doc, url, feedId, 'updating', state));
   });
   const promise = Promise.all(promises);
   promise.then((newFeeds) => {
