@@ -63,13 +63,18 @@ export default async () => {
     addRssFeed(watchedState);
   });
 
+  const getClickedPost = (target) => {
+    const { feedId } = target.dataset;
+    const { postId } = target.dataset;
+    const [clickedPost] = watchedState.feeds
+      .filter((feed) => feed.id === feedId)[0].posts
+      .filter((post) => post.id === postId);
+    return clickedPost;
+  };
+
   const modal = $('#modal');
   modal.on('show.bs.modal', ({ relatedTarget }) => {
-    const { feedId } = relatedTarget.dataset;
-    const { postId } = relatedTarget.dataset;
-    const [clickedPost] = state.feeds
-      .flatMap(({ posts }) => posts)
-      .filter((post) => (post.feedId === feedId && post.id === postId));
+    const clickedPost = getClickedPost(relatedTarget);
     watchedState.modalData = {
       title: clickedPost.title,
       description: clickedPost.description,
