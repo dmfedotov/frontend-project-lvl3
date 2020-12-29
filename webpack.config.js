@@ -36,17 +36,10 @@ module.exports = {
         },
       },
       {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
+        rules: [
           {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                plugins: ['precss', 'autoprefixer'],
-              },
-            },
+            test: /\.css$/,
+            use: ['style-loader', 'css-loader'],
           },
         ],
       },
