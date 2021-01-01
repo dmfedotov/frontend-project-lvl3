@@ -45,43 +45,40 @@ const processPosts = (state, feed, feedId) => {
 };
 
 const buildFeed = (doc, url, feedId = uniqueId(), status = 'adding', state) => {
-  const promise = Promise.resolve();
-  return promise
-    .then(() => {
-      const channelElem = doc.querySelector('rss channel');
-      const title = channelElem.querySelector('title').textContent;
-      const feedDesc = channelElem.querySelector('description').textContent;
-      const postElems = channelElem.querySelectorAll('item');
-      const posts = Array.from(postElems).map((elem, index, arr) => {
-        const postDesc = elem.querySelector('description').textContent;
-        return {
-          feedId,
-          id: generatePostId(arr.length, index),
-          title: elem.querySelector('title').textContent,
-          description: postDesc,
-          link: elem.querySelector('link').textContent,
-          pubDate: elem.querySelector('pubDate').textContent,
-          read: false,
-        };
-      });
-
-      const feed = {
-        url,
-        title,
-        feedDesc,
-        posts,
-        id: feedId,
+  try {
+    const channelElem = doc.querySelector('rss channel');
+    const title = channelElem.querySelector('title').textContent;
+    const feedDesc = channelElem.querySelector('description').textContent;
+    const postElems = channelElem.querySelectorAll('item');
+    const posts = Array.from(postElems).map((elem, index, arr) => {
+      const postDesc = elem.querySelector('description').textContent;
+      return {
+        feedId,
+        id: generatePostId(arr.length, index),
+        title: elem.querySelector('title').textContent,
+        description: postDesc,
+        link: elem.querySelector('link').textContent,
+        pubDate: elem.querySelector('pubDate').textContent,
+        read: false,
       };
-
-      if (status === 'updating') {
-        processPosts(state, feed, feedId);
-      }
-      return feed;
-    })
-    .catch((err) => {
-      console.log(err);
-      throw new Error(i18next.t('errors.unexpectedBehavior'));
     });
+
+    const feed = {
+      url,
+      title,
+      feedDesc,
+      posts,
+      id: feedId,
+    };
+
+    if (status === 'updating') {
+      processPosts(state, feed, feedId);
+    }
+    return feed;
+  } catch (err) {
+    console.log(err);
+    throw new Error(i18next.t('errors.unexpectedBehavior'));
+  }
 };
 
 const processUpdates = (data, state) => {
