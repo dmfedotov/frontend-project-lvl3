@@ -9,11 +9,15 @@ const getData = (url) => axios({
   timeout: 5000,
 }).then((response) => response.data.contents);
 
-const parse = (data) => new Promise((resolve) => {
+const parse = (data) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(data, 'application/xml');
-  resolve(doc);
-});
+  const doc = parser.parseFromString(data, 'text/xml');
+  const error = doc.querySelector('parsererror');
+  if (error) {
+    throw new Error(i18next.t('errors.invalidContent'));
+  }
+  return doc;
+};
 
 const generatePostId = (length, index) => String(length - index);
 
