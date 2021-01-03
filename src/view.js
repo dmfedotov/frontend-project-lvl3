@@ -17,7 +17,7 @@ const renderError = (error) => {
   if (error) {
     feedback.classList.add('text-danger');
     inputField.classList.add('border-danger');
-    feedback.textContent = error;
+    feedback.textContent = i18next.t(error);
   }
 };
 

@@ -11,8 +11,8 @@ const validate = (value, feeds) => {
   const urls = feeds.map(({ url }) => url);
   const schema = yup
     .string()
-    .url(i18next.t('errors.invalidUrl'))
-    .notOneOf(urls, i18next.t('errors.duplicate'));
+    .url('errors.invalidUrl')
+    .notOneOf(urls, 'errors.duplicate');
   return schema.validate(value);
 };
 

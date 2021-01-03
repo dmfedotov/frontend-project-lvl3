@@ -7,6 +7,8 @@ export default {
         posts: 'Posts',
       },
       errors: {
+        network: 'Network Error',
+        invalidUrl: 'Must be a valid url',
         duplicate: 'Rss already exists',
         invalidContent: 'This source doesn\'t contain valid rss',
         unexpectedBehavior: 'Something went wrong',

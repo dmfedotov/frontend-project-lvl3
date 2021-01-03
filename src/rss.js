@@ -7,14 +7,18 @@ import { uniqueId, differenceBy } from 'lodash';
 const getData = (url) => axios({
   url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
   timeout: 5000,
-}).then((response) => response.data.contents);
+}).then((response) => response.data.contents)
+  .catch((err) => {
+    console.error(err);
+    throw err;
+  });
 
 const parse = (data) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(data, 'text/xml');
   const error = doc.querySelector('parsererror');
   if (error) {
-    throw new Error(i18next.t('errors.invalidContent'));
+    throw new Error('errors.invalidContent');
   }
   return doc;
 };
@@ -65,6 +69,10 @@ const buildFeed = (doc, url, feedId = uniqueId(), status = 'adding', state) => {
         pubDate: elem.querySelector('pubDate').textContent,
         read: false,
       };
+    })
+    .catch((err) => {
+      console.error(err);
+      throw new Error('errors.unexpectedBehavior');
     });
 
     const feed = {
