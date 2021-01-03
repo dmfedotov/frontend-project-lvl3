@@ -13,7 +13,6 @@ const addRssFeed = (state) => {
     .then(() => validate.byDuplicate(state.feeds, url))
     .then(rss.getData)
     .then(rss.parse)
-    .then(validate.byContent)
     .then((doc) => {
       const feed = rss.buildFeed(doc, url);
       state.feeds.unshift(feed);

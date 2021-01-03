@@ -19,20 +19,7 @@ const byDuplicate = (feeds, url) => {
   });
 };
 
-const byContent = (doc) => {
-  const isRss = doc.querySelector('rss');
-
-  return new Promise((resolve, reject) => {
-    if (isRss) {
-      resolve(doc);
-      return;
-    }
-    reject(new Error(i18next.t('errors.invalidContent')));
-  });
-};
-
 export default {
   byUrl,
   byDuplicate,
-  byContent,
 };
