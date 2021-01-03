@@ -2,16 +2,24 @@
 
 import $ from 'jquery';
 import i18next from 'i18next';
+import * as yup from 'yup';
 import rss from './rss';
 import resources from './locales';
-import validate from './validate';
 import watcher from './view';
+
+const validate = (value, feeds) => {
+  const urls = feeds.map(({ url }) => url);
+  const schema = yup
+    .string()
+    .url(i18next.t('errors.invalidUrl'))
+    .notOneOf(urls, i18next.t('errors.duplicate'));
+  return schema.validate(value);
+};
 
 const addRssFeed = (state) => {
   const { url } = state.form;
-  return validate.byUrl(state.form)
-    .then(() => validate.byDuplicate(state.feeds, url))
-    .then(rss.getData)
+  return validate(url, state.feeds)
+    .then(() => rss.getData(url))
     .then(rss.parse)
     .then((doc) => {
       const feed = rss.buildFeed(doc, url);
