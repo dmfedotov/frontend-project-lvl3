@@ -17,21 +17,15 @@ const validate = (value, urls) => {
 
 const addRssFeed = (state) => {
   const { url } = state.form;
-    .then(() => rss.getData(url))
-    .then(rss.parse)
-    .then((doc) => {
-      const feed = rss.buildFeed(doc, url);
-      state.feeds.unshift(feed);
   return validate(url, state.urls)
+    .then(() => {
+      state.urls.push(url);
+      return rss.getFeed(state);
     })
     .then(() => {
       state.form.processState = 'finished';
       state.form.valid = true;
       state.form.processError = null;
-    })
-    .then(() => {
-      clearTimeout(state.updateTimer);
-      state.updateTimer = setTimeout(() => rss.updateFeeds(state), 5000);
     })
     .catch((err) => {
       state.form.processState = 'failed';
@@ -55,7 +49,6 @@ export default async () => {
     urls: [],
     feeds: [],
     updatedData: [],
-    updateTimer: 0,
     modalData: {},
     readPosts: [],
   };
@@ -69,7 +62,12 @@ export default async () => {
     watchedState.form.url = formData.get('url');
     watchedState.form.processState = 'sending';
     watchedState.form.processError = null;
-    addRssFeed(watchedState);
+    addRssFeed(watchedState)
+      .then(() => {
+        if (watchedState.feeds.length === 1 && watchedState.form.processState !== 'failed') {
+          rss.autoupdate(watchedState);
+        }
+      });
   });
 
   const getClickedPost = (target) => {

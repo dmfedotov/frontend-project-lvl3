@@ -164,7 +164,7 @@ export default (state) => onChange(state, (path, value) => {
       renderError(state.form.processError);
       break;
     case 'feeds':
-      renderFeed(state.feeds);
+      renderFeed(state.feeds.reverse());
       break;
     case 'modalData':
       renderModal(state.modalData);
