@@ -51,7 +51,6 @@ export default async () => {
       processState: 'filling',
       processError: null,
       url: '',
-      valid: true,
     },
     urls: [],
     feeds: [],

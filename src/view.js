@@ -160,8 +160,6 @@ export default (state) => onChange(state, (path, value) => {
     case 'form.processState':
       formProcessStateHandler(value);
       break;
-    case 'form.valid':
-      break;
     case 'form.processError':
       renderError(state.form.processError);
       break;
