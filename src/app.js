@@ -7,8 +7,7 @@ import rss from './rss';
 import resources from './locales';
 import watcher from './view';
 
-const validate = (value, feeds) => {
-  const urls = feeds.map(({ url }) => url);
+const validate = (value, urls) => {
   const schema = yup
     .string()
     .url('errors.invalidUrl')
@@ -18,12 +17,12 @@ const validate = (value, feeds) => {
 
 const addRssFeed = (state) => {
   const { url } = state.form;
-  return validate(url, state.feeds)
     .then(() => rss.getData(url))
     .then(rss.parse)
     .then((doc) => {
       const feed = rss.buildFeed(doc, url);
       state.feeds.unshift(feed);
+  return validate(url, state.urls)
     })
     .then(() => {
       state.form.processState = 'finished';
@@ -54,6 +53,7 @@ export default async () => {
       url: '',
       valid: true,
     },
+    urls: [],
     feeds: [],
     updatedData: [],
     updateTimer: 0,
