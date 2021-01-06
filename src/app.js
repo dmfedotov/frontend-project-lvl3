@@ -7,7 +7,7 @@ import rss from './rss';
 import resources from './locales';
 import watcher from './view';
 
-const validate = (value, urls) => {
+const validateUrl = (value, urls) => {
   const schema = yup
     .string()
     .url('errors.invalidUrl')
@@ -17,7 +17,7 @@ const validate = (value, urls) => {
 
 const addRssFeed = (state) => {
   const { url } = state.form;
-  return validate(url, state.urls)
+  return validateUrl(url, state.urls)
     .then(() => {
       state.urls.push(url);
       return rss.getFeed(state);
