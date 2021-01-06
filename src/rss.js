@@ -2,9 +2,10 @@
 
 import axios from 'axios';
 import { without, differenceBy } from 'lodash';
+const getProxyUrl = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
 const getData = (url, state, isUpdate) => axios({
-  url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url: getProxyUrl(url),
   timeout: 5000,
 }).then((response) => response.data.contents)
   .catch((err) => {
