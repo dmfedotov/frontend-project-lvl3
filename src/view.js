@@ -74,32 +74,54 @@ const renderModal = (data) => {
   link.href = data.link;
 };
 
-const buildList = (name) => {
-  const listElem = document.querySelector(`.${name}`);
-  if (listElem) {
-    listElem.remove();
-  }
-
+const buildList = (className) => {
   const list = document.createElement('ul');
-  list.classList.add('list-group', 'mb-5', name);
+  list.classList.add('list-group', 'mb-5', className);
   return list;
 };
 
-const newPosts = document.createDocumentFragment();
-const renderPost = (list, posts, feedId) => {
-  const postsContainerElem = document.querySelector('.posts');
-  const titleElem = postsContainerElem.querySelector('h2');
+const buildTitle = (text) => {
+  const title = document.createElement('h2');
+  title.textContent = i18next.t(text);
+  return title;
+};
 
-  if (!titleElem) {
-    const postsTitle = document.createElement('h2');
-    postsTitle.textContent = i18next.t('titles.posts');
-    postsContainerElem.append(postsTitle);
-  }
+const renderFeeds = (feeds) => {
+  const feedsContainerElem = document.querySelector('.feeds');
+  feedsContainerElem.innerHTML = '';
+
+  const list = buildList('feeds-list');
+  const listTitle = buildTitle('titles.feeds');
+
+  feedsContainerElem.append(listTitle);
+
+  feeds.forEach((feed) => {
+    const title = document.createElement('h3');
+    title.textContent = feed.title;
+    const description = document.createElement('p');
+    description.textContent = feed.description;
+    const li = document.createElement('li');
+    li.classList.add('list-group-item');
+    li.append(title, description);
+    list.append(li);
+  });
+
+  feedsContainerElem.append(list);
+};
+
+const newPosts = document.createDocumentFragment();
+const renderPosts = (posts, feedId) => {
+  const postsContainerElem = document.querySelector('.posts');
+  postsContainerElem.innerHTML = '';
+
+  const list = buildList('posts-list');
+  const listTitle = buildTitle('titles.posts');
+
+  postsContainerElem.append(listTitle);
 
   posts.forEach((post) => {
-    const fontWeight = post.read ? 'normal' : 'bold';
     const li = document.createElement('li');
-    li.style.fontWeight = fontWeight;
+    li.style.fontWeight = post.read ? 'normal' : 'bold';
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
     const link = document.createElement('a');
     link.textContent = post.title;
@@ -121,39 +143,11 @@ const renderPost = (list, posts, feedId) => {
   postsContainerElem.append(list);
 };
 
-const renderFeed = (feeds) => {
-  const feedsContainerElem = document.querySelector('.feeds');
-  const titleElem = feedsContainerElem.querySelector('h2');
-
-  if (!titleElem) {
-    const feedsTitle = document.createElement('h2');
-    feedsTitle.textContent = i18next.t('titles.feeds');
-    feedsContainerElem.append(feedsTitle);
-  }
-
-  const feedsList = buildList('feeds-list');
-  const postsList = buildList('posts-list');
-
-  feeds.forEach((feed) => {
-    const title = document.createElement('h3');
-    title.textContent = feed.title;
-    const description = document.createElement('p');
-    description.textContent = feed.description;
-    const li = document.createElement('li');
-    li.classList.add('list-group-item');
-    li.append(title, description);
-    feedsList.append(li);
-    renderPost(postsList, feed.posts, feed.id);
-  });
-
-  feedsContainerElem.append(feedsList);
-};
-
 export default (state) => onChange(state, (path, value) => {
   const lastPartPath = last(path.split('.'));
 
   if (lastPartPath === 'read') {
-    renderFeed(state.feeds);
+    renderFeeds(state.feeds);
   }
 
   switch (path) {
@@ -164,7 +158,10 @@ export default (state) => onChange(state, (path, value) => {
       renderError(state.form.processError);
       break;
     case 'feeds':
-      renderFeed(state.feeds.reverse());
+      renderFeeds(state.feeds.reverse());
+      break;
+    case 'posts':
+      renderPosts(state.posts);
       break;
     case 'modalData':
       renderModal(state.modalData);
