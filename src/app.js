@@ -34,8 +34,8 @@ const addRssFeed = (state) => {
     });
 };
 
-export default async () => {
-  await i18next.init({
+export default () => {
+  i18next.init({
     lng: 'en',
     resources,
   });
