@@ -54,46 +54,46 @@ const processPosts = (state, feed, feedId) => {
   });
 };
 
-const buildFeed = (doc, url, feedId, state, status) => {
-  const promise = Promise.resolve();
-  return promise
-    .then(() => {
-      const channelElem = doc.querySelector('rss channel');
-      const title = channelElem.querySelector('title').textContent;
-      const feedDesc = channelElem.querySelector('description').textContent;
-      const postElems = channelElem.querySelectorAll('item');
-      const posts = Array.from(postElems).map((elem, index, arr) => {
-        const postDesc = elem.querySelector('description').textContent;
-        const post = {
-          feedId,
-          id: generateId(arr.length, index),
-          title: elem.querySelector('title').textContent,
-          description: postDesc,
-          link: elem.querySelector('link').textContent,
-          pubDate: elem.querySelector('pubDate').textContent,
-        };
-        post.read = isPostRead(post.title, state.readPosts);
-        return post;
-      });
+const buildFeed = (doc, url, feedId) => {
+  try {
+    const channelElem = doc.querySelector('rss channel');
+    const title = channelElem.querySelector('title').textContent;
+    const feedDesc = channelElem.querySelector('description').textContent;
 
-      const feed = {
-        url,
-        title,
-        description: feedDesc,
-        posts,
-        id: feedId,
+    return {
+      url,
+      title,
+      description: feedDesc,
+      id: feedId,
+    };
+  } catch (err) {
+    console.error(err);
+    throw new Error('errors.unexpectedBehavior');
+  }
+};
+
+const buildPosts = (doc, feedId, state, status) => {
+  try {
+    const channelElem = doc.querySelector('rss channel');
+    const postElems = channelElem.querySelectorAll('item');
+    const posts = Array.from(postElems).map((elem, index, arr) => {
+      const postDesc = elem.querySelector('description').textContent;
+      const post = {
+        feedId,
+        id: generateId(arr.length, index),
+        title: elem.querySelector('title').textContent,
+        description: postDesc,
+        link: elem.querySelector('link').textContent,
+        pubDate: elem.querySelector('pubDate').textContent,
       };
-
-      if (status === 'updating') {
-        processPosts(state, feed, feedId);
-      }
-      return feed;
-    })
-    .catch((err) => {
-      state.urls = without(state.urls, url);
-      console.error(err);
-      throw new Error('errors.unexpectedBehavior');
+      post.read = isPostRead(post.title, state.readPosts);
+      return post;
     });
+    return posts;
+  } catch (err) {
+    console.error(err);
+    throw new Error('errors.unexpectedBehavior');
+  }
 };
 
 const getFeed = (state, status) => {
@@ -101,12 +101,25 @@ const getFeed = (state, status) => {
     const data = getData(url, state, status);
     const feedId = String(index + 1);
     return data
-      .then((content) => parse(content, state))
-      .then((doc) => buildFeed(doc, url, feedId, state, status));
+      .then((content) => {
+        const parsedData = parse(content, state);
+        const feed = buildFeed(parsedData, url, feedId, state, status);
+        const posts = buildPosts(parsedData, feed.id, state, status);
+        return {
+          feed,
+          posts,
+        };
+      });
   });
   return Promise.all(promises)
-    .then((feeds) => {
+    .then((result) => {
+      const feeds = result.map((el) => el.feed);
+      const posts = [];
+      result.forEach((el) => {
+        posts.unshift(...el.posts);
+      });
       state.feeds = feeds;
+      state.posts = posts;
     });
 };
 

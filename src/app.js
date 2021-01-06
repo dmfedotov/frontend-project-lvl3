@@ -48,6 +48,7 @@ export default () => {
     },
     urls: [],
     feeds: [],
+    posts: [],
     updatedData: [],
     modalData: {},
     readPosts: [],
