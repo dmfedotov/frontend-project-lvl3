@@ -109,7 +109,6 @@ const renderFeeds = (feeds) => {
   feedsContainerElem.append(list);
 };
 
-const newPosts = document.createDocumentFragment();
 const renderPosts = (posts, feedId) => {
   const postsContainerElem = document.querySelector('.posts');
   postsContainerElem.innerHTML = '';
@@ -130,16 +129,9 @@ const renderPosts = (posts, feedId) => {
     link.setAttribute('data-post-id', post.id);
     const modalButton = createModalButton(feedId, post.id);
     li.append(link, modalButton);
-
-    if (post.status === 'new') {
-      newPosts.append(li);
-      return;
-    }
-
     list.append(li);
   });
 
-  list.prepend(newPosts);
   postsContainerElem.append(list);
 };
 
@@ -158,7 +150,7 @@ export default (state) => onChange(state, (path, value) => {
       renderError(state.form.processError);
       break;
     case 'feeds':
-      renderFeeds(state.feeds.reverse());
+      renderFeeds(state.feeds);
       break;
     case 'posts':
       renderPosts(state.posts);

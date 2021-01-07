@@ -17,10 +17,15 @@ const validateUrl = (value, urls) => {
 
 const addRssFeed = (state) => {
   const { url } = state.form;
-  return validateUrl(url, state.urls)
-    .then(() => {
-      state.urls.push(url);
-      return rss.getFeed(state);
+  const urls = state.feeds.map((feed) => feed.url);
+  return validateUrl(url, urls)
+    .then(() => rss.getData(url))
+    .then(rss.parse)
+    .then((parsedData) => {
+      const feed = rss.buildFeed(parsedData, url);
+      const posts = rss.buildPosts(parsedData, feed.id, state);
+      state.feeds.unshift(feed);
+      state.posts.unshift(...posts);
     })
     .then(() => {
       state.form.processState = 'finished';
@@ -46,12 +51,9 @@ export default () => {
       processError: null,
       url: '',
     },
-    urls: [],
     feeds: [],
     posts: [],
-    updatedData: [],
     modalData: {},
-    readPosts: [],
   };
 
   const watchedState = watcher(state);
@@ -65,7 +67,7 @@ export default () => {
     watchedState.form.processError = null;
     addRssFeed(watchedState)
       .then(() => {
-        if (watchedState.feeds.length === 1 && watchedState.form.processState !== 'failed') {
+        if (watchedState.feeds.length === 1 && watchedState.form.processState === 'finished') {
           rss.autoupdate(watchedState);
         }
       });

@@ -1,26 +1,26 @@
 /* eslint-disable no-param-reassign */
 
 import axios from 'axios';
-import { without, differenceBy } from 'lodash';
+import { differenceBy, uniqueId } from 'lodash';
+
 const getProxyUrl = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
 const getData = (url, state, isUpdate) => axios({
+const getData = (url) => axios({
   url: getProxyUrl(url),
+  //  url: cors(url),
   timeout: 5000,
 }).then((response) => response.data.contents)
   .catch((err) => {
-    if (state.urls.length === 1 && !isUpdate) {
-      state.urls = [];
-    }
+    console.log(err);
     throw err;
   });
 
-const parse = (data, state) => {
+const parse = (data) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(data, 'text/xml');
   const error = doc.querySelector('parsererror');
   if (error) {
-    state.urls = without(state.urls, state.form.url);
     throw new Error('errors.invalidContent');
   }
   return doc;
@@ -28,34 +28,9 @@ const parse = (data, state) => {
 
 const generateId = (length, index) => String(length - index);
 
-const findNewPosts = (currentFeeds, updatedFeed, feedId) => {
-  const { posts: updatedPosts } = updatedFeed;
-  const [currentFeed] = currentFeeds.filter((feed) => feed.id === feedId);
-  const { posts: currentPosts } = currentFeed;
-  return differenceBy(updatedPosts, currentPosts, 'title');
-};
+const findNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'title');
 
-const isPostRead = (postTitle, readPosts) => {
-  const readPostsTitles = readPosts.map(({ title }) => title);
-  const isRead = readPostsTitles.includes(postTitle);
-  return isRead;
-};
-
-const processPosts = (state, feed, feedId) => {
-  const newPosts = findNewPosts(state.feeds, feed, feedId);
-  state.updatedData.push(...newPosts);
-  const titles = state.updatedData.map((post) => post.title);
-  feed.posts.forEach((post) => {
-    const isNew = titles.includes(post.title);
-    post.read = isPostRead(post.title, state.readPosts);
-    if (isNew) {
-      post.status = 'new';
-    }
-    return post;
-  });
-};
-
-const buildFeed = (doc, url, feedId) => {
+const buildFeed = (doc, url, id = uniqueId()) => {
   try {
     const channelElem = doc.querySelector('rss channel');
     const title = channelElem.querySelector('title').textContent;
@@ -65,7 +40,7 @@ const buildFeed = (doc, url, feedId) => {
       url,
       title,
       description: feedDesc,
-      id: feedId,
+      id,
     };
   } catch (err) {
     console.error(err);
@@ -73,7 +48,7 @@ const buildFeed = (doc, url, feedId) => {
   }
 };
 
-const buildPosts = (doc, feedId, state, status) => {
+const buildPosts = (doc, feedId) => {
   try {
     const channelElem = doc.querySelector('rss channel');
     const postElems = channelElem.querySelectorAll('item');
@@ -85,9 +60,8 @@ const buildPosts = (doc, feedId, state, status) => {
         title: elem.querySelector('title').textContent,
         description: postDesc,
         link: elem.querySelector('link').textContent,
-        pubDate: elem.querySelector('pubDate').textContent,
+        read: false,
       };
-      post.read = isPostRead(post.title, state.readPosts);
       return post;
     });
     return posts;
@@ -97,41 +71,30 @@ const buildPosts = (doc, feedId, state, status) => {
   }
 };
 
-const getFeed = (state, status) => {
-  const promises = state.urls.map((url, index) => {
-    const data = getData(url, state, status);
+const autoupdate = (state) => setTimeout(() => {
+  const urls = state.feeds.map(({ url }) => url);
+  const promises = urls.map((url, index) => {
+    const data = getData(url, state);
     const feedId = String(index + 1);
     return data
       .then((content) => {
         const parsedData = parse(content, state);
-        const feed = buildFeed(parsedData, url, feedId, state, status);
-        const posts = buildPosts(parsedData, feed.id, state, status);
-        return {
-          feed,
-          posts,
-        };
+        return buildPosts(parsedData, feedId, state, 'updating');
       });
   });
   return Promise.all(promises)
-    .then((result) => {
-      const feeds = result.map((el) => el.feed);
-      const posts = [];
-      result.forEach((el) => {
-        posts.unshift(...el.posts);
-      });
-      state.feeds = feeds;
-      state.posts = posts;
-    });
-};
-
-const autoupdate = (state) => setTimeout(() => {
-  getFeed(state, 'updating')
+    .then(([updatedPosts]) => {
+      const newPosts = findNewPosts(state.posts, updatedPosts);
+      state.posts.unshift(...newPosts);
+    })
     .finally(() => autoupdate(state))
     .catch(console.log);
 }, 5000);
 
 export default {
+  getData,
+  parse,
   buildFeed,
-  getFeed,
+  buildPosts,
   autoupdate,
 };
