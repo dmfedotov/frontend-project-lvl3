@@ -77,7 +77,7 @@ const autoupdate = (state) => setTimeout(() => {
     return data
       .then((content) => {
         const parsedData = parse(content, state);
-        return buildPosts(parsedData, feedId, state, 'updating');
+        return buildPosts(parsedData, feedId);
       });
   });
   return Promise.all(promises)
