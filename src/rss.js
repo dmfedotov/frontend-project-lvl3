@@ -5,10 +5,8 @@ import { differenceBy, uniqueId } from 'lodash';
 
 const getProxyUrl = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
-const getData = (url, state, isUpdate) => axios({
 const getData = (url) => axios({
   url: getProxyUrl(url),
-  //  url: cors(url),
   timeout: 5000,
 }).then((response) => response.data.contents)
   .catch((err) => {
