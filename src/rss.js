@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 import axios from 'axios';
-import { differenceBy, uniqueId } from 'lodash';
+import { differenceBy } from 'lodash';
 
 const getProxyUrl = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
@@ -24,11 +24,9 @@ const parse = (data) => {
   return doc;
 };
 
-const generateId = (length, index) => String(length - index);
-
 const findNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'title');
 
-const buildFeed = (doc, url, id = uniqueId()) => {
+const buildFeed = (doc, url, feedsCount) => {
   try {
     const channelElem = doc.querySelector('rss channel');
     const title = channelElem.querySelector('title').textContent;
@@ -38,7 +36,7 @@ const buildFeed = (doc, url, id = uniqueId()) => {
       url,
       title,
       description: feedDesc,
-      id,
+      id: String(feedsCount + 1),
     };
   } catch (err) {
     console.error(err);
@@ -52,15 +50,15 @@ const buildPosts = (doc, feedId) => {
     const postElems = channelElem.querySelectorAll('item');
     const posts = Array.from(postElems).map((elem, index, arr) => {
       const postDesc = elem.querySelector('description').textContent;
-      const post = {
+
+      return {
         feedId,
-        id: generateId(arr.length, index),
+        id: String(arr.length - index),
         title: elem.querySelector('title').textContent,
         description: postDesc,
         link: elem.querySelector('link').textContent,
         read: false,
       };
-      return post;
     });
     return posts;
   } catch (err) {
@@ -71,6 +69,7 @@ const buildPosts = (doc, feedId) => {
 
 const autoupdate = (state) => setTimeout(() => {
   const urls = state.feeds.map(({ url }) => url);
+
   const promises = urls.map((url, index) => {
     const data = getData(url, state);
     const feedId = String(index + 1);
@@ -80,6 +79,7 @@ const autoupdate = (state) => setTimeout(() => {
         return buildPosts(parsedData, feedId);
       });
   });
+
   return Promise.all(promises)
     .then(([updatedPosts]) => {
       const newPosts = findNewPosts(state.posts, updatedPosts);
@@ -89,7 +89,7 @@ const autoupdate = (state) => setTimeout(() => {
     .catch(console.log);
 }, 5000);
 
-export default {
+export {
   getData,
   parse,
   buildFeed,

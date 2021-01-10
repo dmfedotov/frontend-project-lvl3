@@ -3,6 +3,7 @@
 import onChange from 'on-change';
 import i18next from 'i18next';
 import { last } from 'lodash';
+import getRequiredPost from './utils';
 
 const inputField = document.querySelector('input');
 const submitButton = document.querySelector('button[type="submit"]');
@@ -65,13 +66,14 @@ const createModalButton = (feedId, postId) => {
   return button;
 };
 
-const renderModal = (data) => {
+const renderModal = (posts, data) => {
+  const post = getRequiredPost(posts, data.feedId, data.postId);
   const title = document.querySelector('.modal-title');
   const desc = document.querySelector('.modal-body');
   const link = document.querySelector('.full-article');
-  title.textContent = data.title;
-  desc.textContent = data.description;
-  link.href = data.link;
+  title.textContent = post.title;
+  desc.textContent = post.description;
+  link.href = post.link;
 };
 
 const buildList = (className) => {
@@ -109,7 +111,7 @@ const renderFeeds = (feeds) => {
   feedsContainerElem.append(list);
 };
 
-const renderPosts = (posts, feedId) => {
+const renderPosts = (posts) => {
   const postsContainerElem = document.querySelector('.posts');
   postsContainerElem.innerHTML = '';
 
@@ -127,7 +129,7 @@ const renderPosts = (posts, feedId) => {
     link.href = post.link;
     link.setAttribute('data-feed-id', post.feedId);
     link.setAttribute('data-post-id', post.id);
-    const modalButton = createModalButton(feedId, post.id);
+    const modalButton = createModalButton(post.feedId, post.id);
     li.append(link, modalButton);
     list.append(li);
   });
@@ -137,9 +139,8 @@ const renderPosts = (posts, feedId) => {
 
 export default (state) => onChange(state, (path, value) => {
   const lastPartPath = last(path.split('.'));
-
   if (lastPartPath === 'read') {
-    renderFeeds(state.feeds);
+    renderPosts(state.posts);
   }
 
   switch (path) {
@@ -155,8 +156,8 @@ export default (state) => onChange(state, (path, value) => {
     case 'posts':
       renderPosts(state.posts);
       break;
-    case 'modalData':
-      renderModal(state.modalData);
+    case 'uiState.modal':
+      renderModal(state.posts, state.uiState.modal);
       break;
     default:
       break;

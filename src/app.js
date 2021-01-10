@@ -3,7 +3,10 @@
 import $ from 'jquery';
 import i18next from 'i18next';
 import * as yup from 'yup';
-import rss from './rss';
+import {
+  getData, parse, buildFeed, buildPosts, autoupdate,
+} from './rss';
+import getRequiredPost from './utils';
 import resources from './locales';
 import watcher from './view';
 
@@ -19,22 +22,26 @@ const addRssFeed = (state) => {
   const { url } = state.form;
   const urls = state.feeds.map((feed) => feed.url);
   return validateUrl(url, urls)
-    .then(() => rss.getData(url))
-    .then(rss.parse)
-    .then((parsedData) => {
-      const feed = rss.buildFeed(parsedData, url);
-      const posts = rss.buildPosts(parsedData, feed.id, state);
+    .then(() => getData(url))
+    .then((data) => {
+      const parsedData = parse(data);
+
+      const feed = buildFeed(parsedData, url, state.feeds.length);
+      const posts = buildPosts(parsedData, feed.id, state);
+
       state.feeds.unshift(feed);
       state.posts.unshift(...posts);
     })
     .then(() => {
       state.form.processState = 'finished';
-      state.form.valid = true;
       state.form.processError = null;
+
+      if (state.feeds.length === 1) {
+        autoupdate(state);
+      }
     })
     .catch((err) => {
       state.form.processState = 'failed';
-      state.form.valid = false;
       state.form.processError = err.message;
     });
 };
@@ -53,7 +60,9 @@ export default () => {
     },
     feeds: [],
     posts: [],
-    modalData: {},
+    uiState: {
+      modal: {},
+    },
   };
 
   const watchedState = watcher(state);
@@ -65,30 +74,21 @@ export default () => {
     watchedState.form.url = formData.get('url');
     watchedState.form.processState = 'sending';
     watchedState.form.processError = null;
-    addRssFeed(watchedState)
-      .then(() => {
-        if (watchedState.feeds.length === 1 && watchedState.form.processState === 'finished') {
-          rss.autoupdate(watchedState);
-        }
-      });
+    addRssFeed(watchedState);
   });
 
   const getClickedPost = (target) => {
     const { feedId } = target.dataset;
     const { postId } = target.dataset;
-    const [clickedPost] = watchedState.feeds
-      .filter((feed) => feed.id === feedId)[0].posts
-      .filter((post) => post.id === postId);
-    return clickedPost;
+    return getRequiredPost(watchedState.posts, feedId, postId);
   };
 
   const modal = $('#modal');
   modal.on('show.bs.modal', ({ relatedTarget }) => {
     const clickedPost = getClickedPost(relatedTarget);
-    watchedState.modalData = {
-      title: clickedPost.title,
-      description: clickedPost.description,
-      link: clickedPost.link,
+    watchedState.uiState.modal = {
+      feedId: clickedPost.feedId,
+      postId: clickedPost.id,
     };
   });
 
@@ -97,7 +97,6 @@ export default () => {
     if (target.tagName === 'A' || target.tagName === 'BUTTON') {
       const clickedPost = getClickedPost(target);
       clickedPost.read = true;
-      watchedState.readPosts.push(clickedPost);
     }
   });
 };
