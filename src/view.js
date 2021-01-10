@@ -2,7 +2,6 @@
 
 import onChange from 'on-change';
 import i18next from 'i18next';
-import { last } from 'lodash';
 import getRequiredPost from './utils';
 
 const inputField = document.querySelector('input');
@@ -111,7 +110,12 @@ const renderFeeds = (feeds) => {
   feedsContainerElem.append(list);
 };
 
-const renderPosts = (posts) => {
+const markPostAsRead = (post, readPosts) => {
+  const isPostExisted = getRequiredPost(readPosts, post.feedId, post.id);
+  return isPostExisted ? 'normal' : 'bold';
+};
+
+const renderPosts = (posts, readPosts = []) => {
   const postsContainerElem = document.querySelector('.posts');
   postsContainerElem.innerHTML = '';
 
@@ -122,7 +126,7 @@ const renderPosts = (posts) => {
 
   posts.forEach((post) => {
     const li = document.createElement('li');
-    li.style.fontWeight = post.read ? 'normal' : 'bold';
+    li.style.fontWeight = markPostAsRead(post, readPosts);
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
     const link = document.createElement('a');
     link.textContent = post.title;
@@ -138,11 +142,6 @@ const renderPosts = (posts) => {
 };
 
 export default (state) => onChange(state, (path, value) => {
-  const lastPartPath = last(path.split('.'));
-  if (lastPartPath === 'read') {
-    renderPosts(state.posts);
-  }
-
   switch (path) {
     case 'form.processState':
       formProcessStateHandler(value);
@@ -158,6 +157,9 @@ export default (state) => onChange(state, (path, value) => {
       break;
     case 'uiState.modal':
       renderModal(state.posts, state.uiState.modal);
+      break;
+    case 'uiState.readPosts':
+      renderPosts(state.posts, state.uiState.readPosts);
       break;
     default:
       break;

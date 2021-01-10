@@ -57,7 +57,6 @@ const buildPosts = (doc, feedId) => {
         title: elem.querySelector('title').textContent,
         description: postDesc,
         link: elem.querySelector('link').textContent,
-        read: false,
       };
     });
     return posts;
