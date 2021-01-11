@@ -61,6 +61,7 @@ const buildModalButton = (feedId, postId) => {
   button.setAttribute('data-target', '#modal');
   button.setAttribute('data-feed-id', feedId);
   button.setAttribute('data-post-id', postId);
+  button.setAttribute('data-mark', 'read');
   button.textContent = 'Preview';
   return button;
 };
@@ -133,6 +134,7 @@ const renderPosts = (posts, readPosts = []) => {
     link.href = post.link;
     link.setAttribute('data-feed-id', post.feedId);
     link.setAttribute('data-post-id', post.id);
+    link.setAttribute('data-mark', 'read');
     const modalButton = buildModalButton(post.feedId, post.id);
     li.append(link, modalButton);
     list.append(li);

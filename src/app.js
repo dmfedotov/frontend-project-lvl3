@@ -94,7 +94,7 @@ export default () => i18next.init({
 
   const feedContainer = document.querySelector('.feed-container');
   feedContainer.addEventListener('click', ({ target }) => {
-    if (target.tagName === 'A' || target.tagName === 'BUTTON') {
+    if (target.dataset.mark === 'read') {
       const clickedPost = getClickedPost(target);
       const data = {
         feedId: clickedPost.feedId,
