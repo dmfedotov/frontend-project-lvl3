@@ -53,7 +53,7 @@ const formProcessStateHandler = (processState) => {
   }
 };
 
-const createModalButton = (feedId, postId) => {
+const buildModalButton = (feedId, postId) => {
   const button = document.createElement('button');
   button.type = 'button';
   button.classList.add('btn', 'btn-primary', 'btn-sm');
@@ -133,7 +133,7 @@ const renderPosts = (posts, readPosts = []) => {
     link.href = post.link;
     link.setAttribute('data-feed-id', post.feedId);
     link.setAttribute('data-post-id', post.id);
-    const modalButton = createModalButton(post.feedId, post.id);
+    const modalButton = buildModalButton(post.feedId, post.id);
     li.append(link, modalButton);
     list.append(li);
   });
