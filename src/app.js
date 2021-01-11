@@ -21,14 +21,13 @@ const validateUrl = (value, urls) => {
 const addRssFeed = (state) => {
   const { url } = state.form;
   const urls = state.feeds.map((feed) => feed.url);
-  const feedsCount = state.feeds.length;
 
   return validateUrl(url, urls)
     .then(() => getData(url))
     .then((data) => {
       const parsedData = parse(data);
 
-      const feed = buildFeed(parsedData, url, feedsCount);
+      const feed = buildFeed(parsedData, url, state.feeds.length);
       const posts = buildPosts(parsedData, feed.id, state);
 
       state.feeds.unshift(feed);
@@ -38,7 +37,7 @@ const addRssFeed = (state) => {
       state.form.processState = 'finished';
       state.form.processError = null;
 
-      if (feedsCount === 1) {
+      if (state.feeds.length === 1) {
         autoupdate(state);
       }
     })
