@@ -21,49 +21,38 @@ const parse = (data) => {
   if (error) {
     throw new Error('errors.invalidContent');
   }
-  return doc;
+
+  try {
+    const channelElem = doc.querySelector('rss channel');
+    const postElems = channelElem.querySelectorAll('item');
+    const title = channelElem.querySelector('title').textContent;
+    const description = channelElem.querySelector('description').textContent;
+    const posts = [...postElems].map((post) => {
+      const postTitle = post.querySelector('title').textContent;
+      const postDesc = post.querySelector('description').textContent;
+      const link = post.querySelector('link').textContent;
+      return { title: postTitle, description: postDesc, link };
+    });
+    return { title, description, posts };
+  } catch (err) {
+    console.error(err);
+    throw new Error('errors.unexpectedBehavior');
+  }
 };
 
 const findNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'title');
 
-const buildFeed = (doc, url, feedsCount) => {
-  try {
-    const channelElem = doc.querySelector('rss channel');
-    const title = channelElem.querySelector('title').textContent;
-    const feedDesc = channelElem.querySelector('description').textContent;
-
-    return {
-      url,
-      title,
-      description: feedDesc,
-      id: String(feedsCount + 1),
-    };
-  } catch (err) {
-    console.error(err);
-    throw new Error('errors.unexpectedBehavior');
-  }
+const buildFeed = (data, url, id) => {
+  const feed = { ...data, url, id: String(id) };
+  return feed;
 };
 
-const buildPosts = (doc, feedId) => {
-  try {
-    const channelElem = doc.querySelector('rss channel');
-    const postElems = channelElem.querySelectorAll('item');
-    const posts = Array.from(postElems).map((elem, index, arr) => {
-      const postDesc = elem.querySelector('description').textContent;
-
-      return {
-        feedId,
-        id: String(arr.length - index),
-        title: elem.querySelector('title').textContent,
-        description: postDesc,
-        link: elem.querySelector('link').textContent,
-      };
-    });
-    return posts;
-  } catch (err) {
-    console.error(err);
-    throw new Error('errors.unexpectedBehavior');
-  }
+const buildPosts = (data, feedId) => {
+  const posts = data.map((item, index, arr) => {
+    const id = String(arr.length - index);
+    return { ...item, id, feedId };
+  });
+  return posts;
 };
 
 const autoupdate = (state) => setTimeout(() => {
@@ -74,8 +63,8 @@ const autoupdate = (state) => setTimeout(() => {
     const feedId = String(index + 1);
     return data
       .then((content) => {
-        const parsedData = parse(content, state);
-        return buildPosts(parsedData, feedId);
+        const feedData = parse(content);
+        return buildPosts(feedData.posts, feedId);
       });
   });
 

@@ -4,7 +4,11 @@ import $ from 'jquery';
 import i18next from 'i18next';
 import * as yup from 'yup';
 import {
-  getData, parse, buildFeed, buildPosts, autoupdate,
+  getData,
+  parse,
+  buildFeed,
+  buildPosts,
+  autoupdate,
 } from './rss';
 import getRequiredPost from './utils';
 import resources from './locales';
@@ -25,10 +29,10 @@ const addRssFeed = (state) => {
   return validateUrl(url, urls)
     .then(() => getData(url))
     .then((data) => {
-      const parsedData = parse(data);
-
-      const feed = buildFeed(parsedData, url, state.feeds.length);
-      const posts = buildPosts(parsedData, feed.id, state);
+      const feedData = parse(data);
+      const feedsCount = state.feeds.length + 1;
+      const feed = buildFeed(feedData, url, feedsCount);
+      const posts = buildPosts(feedData.posts, feed.id, state);
 
       state.feeds.unshift(feed);
       state.posts.unshift(...posts);
