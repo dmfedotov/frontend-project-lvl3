@@ -48,12 +48,10 @@ const addRssFeed = (state) => {
     });
 };
 
-export default () => {
-  i18next.init({
-    lng: 'en',
-    resources,
-  });
-
+export default () => i18next.init({
+  lng: 'en',
+  resources,
+}).then(() => {
   const state = {
     form: {
       processState: 'filling',
@@ -110,4 +108,4 @@ export default () => {
       }
     }
   });
-};
+});
