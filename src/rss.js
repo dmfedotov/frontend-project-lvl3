@@ -10,7 +10,7 @@ const getData = (url) => axios({
   timeout: 5000,
 }).then((response) => response.data.contents)
   .catch((err) => {
-    console.log(err);
+    //  console.log(err);
     throw err;
   });
 
@@ -22,22 +22,18 @@ const parse = (data) => {
     throw new Error('errors.invalidContent');
   }
 
-  try {
-    const channelElem = doc.querySelector('rss channel');
-    const postElems = channelElem.querySelectorAll('item');
-    const title = channelElem.querySelector('title').textContent;
-    const description = channelElem.querySelector('description').textContent;
-    const posts = [...postElems].map((post) => {
-      const postTitle = post.querySelector('title').textContent;
-      const postDesc = post.querySelector('description').textContent;
-      const link = post.querySelector('link').textContent;
-      return { title: postTitle, description: postDesc, link };
-    });
-    return { title, description, posts };
-  } catch (err) {
-    console.error(err);
-    throw new Error('errors.unexpectedBehavior');
-  }
+  const channelElem = doc.querySelector('rss channel');
+  const postElems = channelElem.querySelectorAll('item');
+  const title = channelElem.querySelector('title').textContent;
+  const description = channelElem.querySelector('description').textContent;
+  const posts = [...postElems].map((post) => {
+    const postTitle = post.querySelector('title').textContent;
+    const postDesc = post.querySelector('description').textContent;
+    const link = post.querySelector('link').textContent;
+    return { title: postTitle, description: postDesc, link };
+  });
+
+  return { title, description, posts };
 };
 
 const findNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'title');

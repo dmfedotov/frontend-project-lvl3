@@ -13,11 +13,13 @@ const renderSuccess = () => {
   feedback.textContent = i18next.t('successMessage');
 };
 
-const renderError = (error) => {
-  if (error) {
-    feedback.classList.add('text-danger');
-    inputField.classList.add('border-danger');
-    feedback.textContent = i18next.t(error);
+const renderError = (errorKey) => {
+  feedback.classList.add('text-danger');
+  inputField.classList.add('border-danger');
+  if (i18next.exists(errorKey) || errorKey === 'Network Error') {
+    feedback.textContent = i18next.t(errorKey);
+  } else {
+    feedback.textContent = i18next.t('errors.unknown');
   }
 };
 
@@ -149,7 +151,9 @@ export default (state) => onChange(state, (path, value) => {
       formProcessStateHandler(value);
       break;
     case 'form.processError':
-      renderError(state.form.processError);
+      if (value !== null) {
+        renderError(state.form.processError);
+      }
       break;
     case 'feeds':
       renderFeeds(state.feeds);

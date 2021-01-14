@@ -48,6 +48,7 @@ const addRssFeed = (state) => {
     .catch((err) => {
       state.form.processState = 'failed';
       state.form.processError = err.message;
+      console.log(err);
     });
 };
 
