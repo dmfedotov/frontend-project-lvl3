@@ -8,11 +8,7 @@ const getProxyUrl = (url) => `https://api.allorigins.win/get?url=${encodeURIComp
 const getData = (url) => axios({
   url: getProxyUrl(url),
   timeout: 5000,
-}).then((response) => response.data.contents)
-  .catch((err) => {
-    //  console.log(err);
-    throw err;
-  });
+}).then((response) => response.data.contents);
 
 const parse = (data) => {
   const parser = new DOMParser();
