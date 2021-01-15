@@ -113,12 +113,7 @@ const renderFeeds = (feeds) => {
   feedsContainerElem.append(list);
 };
 
-const markPostAsRead = (post, readPosts) => {
-  const isPostExisted = getRequiredPost(readPosts, post.feedId, post.id);
-  return isPostExisted ? 'normal' : 'bold';
-};
-
-const renderPosts = (posts, readPosts = []) => {
+const renderPosts = (posts, readPosts) => {
   const postsContainerElem = document.querySelector('.posts');
   postsContainerElem.innerHTML = '';
 
@@ -129,7 +124,7 @@ const renderPosts = (posts, readPosts = []) => {
 
   posts.forEach((post) => {
     const li = document.createElement('li');
-    li.style.fontWeight = markPostAsRead(post, readPosts);
+    li.style.fontWeight = readPosts.has(post.id) ? 'normal' : 'bold';
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
     const link = document.createElement('a');
     link.textContent = post.title;
@@ -159,7 +154,7 @@ export default (state) => onChange(state, (path, value) => {
       renderFeeds(state.feeds);
       break;
     case 'posts':
-      renderPosts(state.posts);
+      renderPosts(state.posts, state.uiState.readPosts);
       break;
     case 'uiState.modal':
       renderModal(state.posts, state.uiState.modal);

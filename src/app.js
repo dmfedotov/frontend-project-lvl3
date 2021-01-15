@@ -66,7 +66,7 @@ export default () => i18next.init({
     posts: [],
     uiState: {
       modal: {},
-      readPosts: [],
+      readPosts: new Set(),
     },
   };
 
@@ -101,15 +101,7 @@ export default () => i18next.init({
   feedContainer.addEventListener('click', ({ target }) => {
     if (target.dataset.mark === 'read') {
       const clickedPost = getClickedPost(target);
-      const data = {
-        feedId: clickedPost.feedId,
-        id: clickedPost.id,
-      };
-      const isPostExisted = getRequiredPost(watchedState.uiState.readPosts, data.feedId, data.id);
-
-      if (!isPostExisted) {
-        watchedState.uiState.readPosts.push(data);
-      }
+      watchedState.uiState.readPosts.add(clickedPost.id);
     }
   });
 });
