@@ -32,7 +32,7 @@ const parse = (data) => {
   return { title, description, posts };
 };
 
-const findNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'title');
+const findNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'link');
 
 const buildFeed = (data, url, id) => {
   const feed = { ...data, url, id: String(id) };
