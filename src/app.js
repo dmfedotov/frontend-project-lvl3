@@ -65,7 +65,7 @@ export default () => i18next.init({
     feeds: [],
     posts: [],
     uiState: {
-      modal: {},
+      modal: { postId: '' },
       readPosts: new Set(),
     },
   };
@@ -83,18 +83,16 @@ export default () => i18next.init({
   });
 
   const getClickedPost = (target) => {
-    const { feedId } = target.dataset;
     const { postId } = target.dataset;
-    return getRequiredPost(watchedState.posts, feedId, postId);
+    return getRequiredPost(watchedState.posts, postId);
   };
 
   const modal = $('#modal');
   modal.on('show.bs.modal', ({ relatedTarget }) => {
     const clickedPost = getClickedPost(relatedTarget);
-    watchedState.uiState.modal = {
-      feedId: clickedPost.feedId,
-      postId: clickedPost.id,
-    };
+    console.log('modal: ', watchedState.uiState.modal.postId);
+    console.log('clicked: ', clickedPost.id);
+    watchedState.uiState.modal.postId = clickedPost.id;
   });
 
   const feedContainer = document.querySelector('.feed-container');

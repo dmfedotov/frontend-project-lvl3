@@ -68,8 +68,8 @@ const buildModalButton = (feedId, postId) => {
   return button;
 };
 
-const renderModal = (posts, data) => {
-  const post = getRequiredPost(posts, data.feedId, data.postId);
+const renderModal = (posts, postId) => {
+  const post = getRequiredPost(posts, postId);
   const title = document.querySelector('.modal-title');
   const desc = document.querySelector('.modal-body');
   const link = document.querySelector('.full-article');
@@ -156,8 +156,8 @@ export default (state) => onChange(state, (path, value) => {
     case 'posts':
       renderPosts(state.posts, state.uiState.readPosts);
       break;
-    case 'uiState.modal':
-      renderModal(state.posts, state.uiState.modal);
+    case 'uiState.modal.postId':
+      renderModal(state.posts, state.uiState.modal.postId);
       break;
     case 'uiState.readPosts':
       renderPosts(state.posts, state.uiState.readPosts);
