@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 import axios from 'axios';
-import { differenceBy } from 'lodash';
+import { differenceBy, uniqueId } from 'lodash';
 
 const getProxyUrl = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
@@ -40,8 +40,8 @@ const buildFeed = (data, url, id) => {
 };
 
 const buildPosts = (data, feedId) => {
-  const posts = data.map((item, index, arr) => {
-    const id = String(arr.length - index);
+  const posts = data.map((item) => {
+    const id = uniqueId();
     return { ...item, id, feedId };
   });
   return posts;
