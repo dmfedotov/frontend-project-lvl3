@@ -77,8 +77,9 @@ const addRssFeed = (state) => {
       }
     })
     .catch((err) => {
+      const error = axios.isAxiosError(err) ? 'errors.network' : err.message;
       state.form.processState = 'failed';
-      state.form.processError = err.message;
+      state.form.processError = error;
       console.log(err);
     });
 };

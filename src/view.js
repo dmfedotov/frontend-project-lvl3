@@ -13,14 +13,14 @@ const renderSuccess = () => {
   feedback.textContent = i18next.t('successMessage');
 };
 
-const renderError = (errorKey) => {
+const renderError = (error) => {
   feedback.classList.add('text-danger');
   inputField.classList.add('border-danger');
-  if (i18next.exists(errorKey) || errorKey === 'Network Error') {
-    feedback.textContent = i18next.t(errorKey);
-  } else {
-    feedback.textContent = i18next.t('errors.unknown');
+  if (i18next.exists(error)) {
+    feedback.textContent = i18next.t(error);
+    return;
   }
+  feedback.textContent = i18next.t('errors.unknown');
 };
 
 const clearFeedback = () => {

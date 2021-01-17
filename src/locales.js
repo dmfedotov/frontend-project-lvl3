@@ -10,7 +10,7 @@ export default {
         network: 'Network Error',
         invalidUrl: 'Must be a valid url',
         duplicate: 'Rss already exists',
-        invalidContent: 'This source doesn\'t contain valid rss',
+        parsing: 'This source doesn\'t contain valid rss',
         unknown: 'Something went wrong',
       },
     },
