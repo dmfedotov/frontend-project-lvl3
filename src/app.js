@@ -22,7 +22,7 @@ const validateUrl = (value, urls) => {
   return schema.validate(value);
 };
 
-const getProxyUrl = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+const getProxyUrl = (url) => `https://hexlet-allorigins.herokuapp.com/get?url=${encodeURIComponent(url)}`;
 
 const getData = (url) => axios({
   url: getProxyUrl(url),
