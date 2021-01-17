@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import axios from 'axios';
-import { differenceBy } from 'lodash';
+import { compact, differenceBy, isEmpty } from 'lodash';
 import i18next from 'i18next';
 import * as yup from 'yup';
 import {
@@ -13,6 +13,8 @@ import {
 import getRequiredPost from './utils';
 import resources from './locales';
 import watcher from './view';
+
+const updateDelay = 5000;
 
 const validateUrl = (value, urls) => {
   const schema = yup
@@ -35,7 +37,7 @@ const autoupdate = (state) => setTimeout(() => {
   const urls = state.feeds.map(({ url }) => url);
 
   const promises = urls.map((url, index) => {
-    const data = getData(url, state);
+    const data = getData(url);
     const feedId = String(index + 1);
     return data
       .then((content) => {
@@ -44,14 +46,25 @@ const autoupdate = (state) => setTimeout(() => {
       });
   });
 
-  return Promise.all(promises)
-    .then(([updatedPosts]) => {
-      const newPosts = findNewPosts(state.posts, updatedPosts);
-      state.posts.unshift(...newPosts);
+  return Promise.allSettled(promises)
+    .then((result) => {
+      const updatedPosts = compact(result.flatMap(({ value }) => value));
+      const errors = compact(result.map(({ reason }) => reason));
+
+      if (!isEmpty(updatedPosts)) {
+        const newPosts = findNewPosts(state.posts, updatedPosts);
+        state.posts.unshift(...newPosts);
+      }
+      if (!isEmpty(errors)) {
+        errors.forEach((err) => {
+          const { url } = err.config;
+          const reason = err.message;
+          console.log(`Data on this url ${url} hasn't been updated. Reason: ${reason}`);
+        });
+      }
     })
-    .finally(() => autoupdate(state))
-    .catch(console.log);
-}, 5000);
+    .finally(() => autoupdate(state));
+}, updateDelay);
 
 const addRssFeed = (state) => {
   const { url } = state.form;
