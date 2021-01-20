@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import axios from 'axios';
-import { compact, differenceBy, isEmpty } from 'lodash';
+import { compact, differenceBy } from 'lodash';
 import i18next from 'i18next';
 import * as yup from 'yup';
 import {
@@ -51,17 +51,14 @@ const autoupdate = (state) => setTimeout(() => {
       const updatedPosts = compact(result.flatMap(({ value }) => value));
       const errors = compact(result.map(({ reason }) => reason));
 
-      if (!isEmpty(updatedPosts)) {
-        const newPosts = findNewPosts(state.posts, updatedPosts);
-        state.posts.unshift(...newPosts);
-      }
-      if (!isEmpty(errors)) {
-        errors.forEach((err) => {
-          const { url } = err.config;
-          const reason = err.message;
-          console.log(`Data on this url ${url} hasn't been updated. Reason: ${reason}`);
-        });
-      }
+      const newPosts = findNewPosts(state.posts, updatedPosts);
+      state.posts.unshift(...newPosts);
+
+      errors.forEach((err) => {
+        const { url } = err.config;
+        const reason = err.message;
+        console.log(`Data on this url ${url} hasn't been updated. Reason: ${reason}`);
+      });
     })
     .finally(() => autoupdate(state));
 }, updateDelay);
