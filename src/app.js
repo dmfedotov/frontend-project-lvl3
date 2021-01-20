@@ -31,7 +31,7 @@ const getData = (url) => axios({
   timeout: 5000,
 }).then((response) => response.data.contents);
 
-const findNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'link');
+const getNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'link');
 
 const autoupdate = (state) => setTimeout(() => {
   const urls = state.feeds.map(({ url }) => url);
@@ -51,7 +51,7 @@ const autoupdate = (state) => setTimeout(() => {
       const updatedPosts = compact(result.flatMap(({ value }) => value));
       const errors = compact(result.map(({ reason }) => reason));
 
-      const newPosts = findNewPosts(state.posts, updatedPosts);
+      const newPosts = getNewPosts(state.posts, updatedPosts);
       state.posts.unshift(...newPosts);
 
       errors.forEach((err) => {
