@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import axios from 'axios';
-import { compact, differenceBy } from 'lodash';
+import { compact, differenceBy, uniqueId } from 'lodash';
 import i18next from 'i18next';
 import * as yup from 'yup';
 import {
@@ -36,9 +36,9 @@ const findNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, 
 const autoupdate = (state) => setTimeout(() => {
   const urls = state.feeds.map(({ url }) => url);
 
-  const promises = urls.map((url, index) => {
+  const promises = urls.map((url) => {
     const data = getData(url);
-    const feedId = String(index + 1);
+    const feedId = uniqueId();
     return data
       .then((content) => {
         const feedData = parse(content);
@@ -132,8 +132,6 @@ export default () => i18next.init({
   const modal = $('#modal');
   modal.on('show.bs.modal', ({ relatedTarget }) => {
     const clickedPost = getClickedPost(relatedTarget);
-    console.log('modal: ', watchedState.uiState.modal.postId);
-    console.log('clicked: ', clickedPost.id);
     watchedState.uiState.modal.postId = clickedPost.id;
   });
 

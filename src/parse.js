@@ -25,7 +25,7 @@ const parse = (data) => {
 };
 
 const buildFeed = (data, url, id) => {
-  const feed = { ...data, url, id: String(id) };
+  const feed = { ...data, url, id };
   return feed;
 };
 
