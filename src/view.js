@@ -2,6 +2,7 @@
 
 import onChange from 'on-change';
 import i18next from 'i18next';
+import { isEmpty } from 'lodash';
 import getRequiredPost from './utils';
 
 const inputField = document.querySelector('input');
@@ -112,6 +113,10 @@ const renderFeeds = (feeds) => {
 const renderPosts = (posts, readPosts) => {
   const postsContainerElem = document.querySelector('.posts');
   postsContainerElem.innerHTML = '';
+
+  if (isEmpty(posts)) {
+    return;
+  }
 
   const list = buildList('posts-list');
   const listTitle = buildTitle('titles.posts');

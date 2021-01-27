@@ -75,6 +75,18 @@ const autoupdate = (state) => setTimeout(() => {
     .finally(() => autoupdate(state));
 }, updateDelay);
 
+const getErrorName = (err) => {
+  let error;
+  if (axios.isAxiosError(err)) {
+    error = 'errors.network';
+  } else if (err.message === 'errors.parsing') {
+    error = err.message;
+  } else {
+    error = 'errors.unknown';
+  }
+  return error;
+};
+
 const addRssFeed = (state) => {
   const { url } = state.form;
 
@@ -91,22 +103,10 @@ const addRssFeed = (state) => {
     .then(() => {
       state.form.processState = 'finished';
       state.form.processError = null;
-
-      if (state.feeds.length === 1) {
-        autoupdate(state);
-      }
     })
     .catch((err) => {
-      let error;
-      if (axios.isAxiosError(err)) {
-        error = 'errors.network';
-      } else if (err.message === 'errors.parsing') {
-        error = err.message;
-      } else {
-        error = 'errors.unknown';
-      }
       state.form.processState = 'failed';
-      state.form.processError = error;
+      state.form.processError = getErrorName(err);
       console.log(err);
     });
 };
@@ -164,4 +164,6 @@ export default () => i18next.init({
       watchedState.uiState.readPosts.add(clickedPost.id);
     }
   });
+
+  autoupdate(watchedState);
 });
