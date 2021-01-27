@@ -97,7 +97,14 @@ const addRssFeed = (state) => {
       }
     })
     .catch((err) => {
-      const error = axios.isAxiosError(err) ? 'errors.network' : err.message;
+      let error;
+      if (axios.isAxiosError(err)) {
+        error = 'errors.network';
+      } else if (err.message === 'errors.parsing') {
+        error = err.message;
+      } else {
+        error = 'errors.unknown';
+      }
       state.form.processState = 'failed';
       state.form.processError = error;
       console.log(err);

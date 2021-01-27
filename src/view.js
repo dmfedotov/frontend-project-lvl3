@@ -16,11 +16,7 @@ const renderSuccess = () => {
 const renderError = (error) => {
   feedback.classList.add('text-danger');
   inputField.classList.add('border-danger');
-  if (i18next.exists(error)) {
-    feedback.textContent = i18next.t(error);
-    return;
-  }
-  feedback.textContent = i18next.t('errors.unknown');
+  feedback.textContent = i18next.t(error);
 };
 
 const clearFeedback = () => {
