@@ -21,7 +21,19 @@ const validateUrl = (value, urls) => {
     .string()
     .url('errors.invalidUrl')
     .notOneOf(urls, 'errors.duplicate');
-  return schema.validate(value);
+  try {
+    schema.validateSync(value);
+    return null;
+  } catch (err) {
+    return err.message;
+  }
+};
+
+const updateValidationState = (watchedState) => {
+  const urls = watchedState.feeds.map((feed) => feed.url);
+  const error = validateUrl(watchedState.form.url, urls);
+  watchedState.form.valid = error === null;
+  watchedState.form.processError = error;
 };
 
 const getProxyUrl = (url) => `https://hexlet-allorigins.herokuapp.com/get?url=${encodeURIComponent(url)}`;
@@ -65,10 +77,8 @@ const autoupdate = (state) => setTimeout(() => {
 
 const addRssFeed = (state) => {
   const { url } = state.form;
-  const urls = state.feeds.map((feed) => feed.url);
 
-  return validateUrl(url, urls)
-    .then(() => getData(url))
+  return getData(url)
     .then((data) => {
       const feedData = parse(data);
       const feedsCount = state.feeds.length + 1;
@@ -103,6 +113,7 @@ export default () => i18next.init({
       processState: 'filling',
       processError: null,
       url: '',
+      valid: true,
     },
     feeds: [],
     posts: [],
@@ -119,9 +130,13 @@ export default () => i18next.init({
     evt.preventDefault();
     const formData = new FormData(evt.target);
     watchedState.form.url = formData.get('url');
-    watchedState.form.processState = 'sending';
-    watchedState.form.processError = null;
-    addRssFeed(watchedState);
+
+    updateValidationState(watchedState);
+    if (watchedState.form.valid) {
+      watchedState.form.processState = 'sending';
+      watchedState.form.processError = null;
+      addRssFeed(watchedState);
+    }
   });
 
   const getClickedPost = (target) => {
