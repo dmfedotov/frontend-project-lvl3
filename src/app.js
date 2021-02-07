@@ -36,7 +36,10 @@ const updateValidationState = (watchedState) => {
   watchedState.form.processError = error;
 };
 
-const getProxyUrl = (url) => `https://hexlet-allorigins.herokuapp.com/get?url=${encodeURIComponent(url)}`;
+const getProxyUrl = (url) => {
+  const proxy = 'https://hexlet-allorigins.herokuapp.com/get?disableCache=true';
+  return `${proxy}&url=${encodeURIComponent(url)}`;
+};
 
 const getData = (url) => axios({
   url: getProxyUrl(url),
