@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import axios from 'axios';
-import { compact, differenceBy, uniqueId } from 'lodash';
+import { differenceBy, uniqueId } from 'lodash';
 import i18next from 'i18next';
 import * as yup from 'yup';
 import {
@@ -59,22 +59,14 @@ const autoupdate = (state) => setTimeout(() => {
       .then((content) => {
         const feedData = parse(content);
         return buildPosts(feedData.posts, feedId);
-      });
+      })
+      .catch(console.log);
   });
 
-  return Promise.allSettled(promises)
-    .then((result) => {
-      const updatedPosts = compact(result.flatMap(({ value }) => value));
-      const errors = compact(result.map(({ reason }) => reason));
-
+  return Promise.all(promises)
+    .then(([updatedPosts]) => {
       const newPosts = getNewPosts(state.posts, updatedPosts);
       state.posts.unshift(...newPosts);
-
-      errors.forEach((err) => {
-        const { url } = err.config;
-        const reason = err.message;
-        console.log(`Data on this url ${url} hasn't been updated. Reason: ${reason}`);
-      });
     })
     .finally(() => autoupdate(state));
 }, updateDelay);
