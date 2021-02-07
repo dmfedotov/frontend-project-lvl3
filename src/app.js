@@ -97,8 +97,8 @@ const addRssFeed = (state) => {
   return getData(url)
     .then((data) => {
       const feedData = parse(data);
-      const feedsCount = state.feeds.length + 1;
-      const feed = buildFeed(feedData, url, feedsCount);
+      const feedId = uniqueId();
+      const feed = buildFeed(feedData, url, feedId);
       const posts = buildPosts(feedData.posts, feed.id, state);
 
       state.feeds.unshift(feed);
