@@ -15,6 +15,7 @@ import resources from './locales';
 import watcher from './view';
 
 const updateDelay = 5000;
+const httpTimeout = 10000;
 
 const validateUrl = (value, urls) => {
   const schema = yup
@@ -43,7 +44,7 @@ const getProxyUrl = (url) => {
 
 const getData = (url) => axios({
   url: getProxyUrl(url),
-  timeout: 5000,
+  timeout: httpTimeout,
 }).then((response) => response.data.contents);
 
 const getNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'link');
