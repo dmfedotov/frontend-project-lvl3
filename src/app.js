@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import axios from 'axios';
-import { differenceBy, uniqueId } from 'lodash';
+import { differenceBy, uniqueId, compact } from 'lodash';
 import i18next from 'i18next';
 import * as yup from 'yup';
 import {
@@ -42,14 +42,15 @@ const getProxyUrl = (url) => {
   return `${proxy}&url=${encodeURIComponent(url)}`;
 };
 
-const getData = (url) => axios({
-  url: getProxyUrl(url),
-  timeout: httpTimeout,
-}).then((response) => response.data.contents);
+const getData = async (url) => {
+  const proxiedUrl = getProxyUrl(url);
+  const response = await axios.get(proxiedUrl, { timeout: httpTimeout });
+  return response.data.contents;
+};
 
 const getNewPosts = (currentPosts, updatedPosts) => differenceBy(updatedPosts, currentPosts, 'link');
 
-const autoupdate = (state) => setTimeout(() => {
+const autoupdate = (state) => setTimeout(async () => {
   const urls = state.feeds.map(({ url }) => url);
 
   const promises = urls.map((url) => {
@@ -63,12 +64,15 @@ const autoupdate = (state) => setTimeout(() => {
       .catch(console.log);
   });
 
-  return Promise.all(promises)
-    .then(([updatedPosts]) => {
-      const newPosts = getNewPosts(state.posts, updatedPosts);
-      state.posts.unshift(...newPosts);
-    })
-    .finally(() => autoupdate(state));
+  try {
+    const updatedData = await Promise.all(promises);
+    const updatedPosts = compact(updatedData).flat();
+    const newPosts = getNewPosts(state.posts, updatedPosts);
+    state.posts.unshift(...newPosts);
+    autoupdate(state);
+  } catch (err) {
+    autoupdate(state);
+  }
 }, updateDelay);
 
 const getErrorName = (err) => {
@@ -83,34 +87,34 @@ const getErrorName = (err) => {
   return error;
 };
 
-const addRssFeed = (state) => {
+const addRssFeed = async (state) => {
   const { url } = state.form;
+  try {
+    const data = await getData(url);
 
-  return getData(url)
-    .then((data) => {
-      const feedData = parse(data);
-      const feedId = uniqueId();
-      const feed = buildFeed(feedData, url, feedId);
-      const posts = buildPosts(feedData.posts, feed.id, state);
+    const feedData = parse(data);
+    const feedId = uniqueId();
+    const feed = buildFeed(feedData, url, feedId);
+    const posts = buildPosts(feedData.posts, feed.id, state);
 
-      state.feeds.unshift(feed);
-      state.posts.unshift(...posts);
-    })
-    .then(() => {
-      state.form.processState = 'finished';
-      state.form.processError = null;
-    })
-    .catch((err) => {
-      state.form.processState = 'failed';
-      state.form.processError = getErrorName(err);
-      console.log(err);
-    });
+    state.feeds.unshift(feed);
+    state.posts.unshift(...posts);
+
+    state.form.processState = 'finished';
+    state.form.processError = null;
+  } catch (err) {
+    state.form.processState = 'failed';
+    state.form.processError = getErrorName(err);
+    console.log(err);
+  }
 };
 
-export default () => i18next.init({
-  lng: 'en',
-  resources,
-}).then(() => {
+export default async () => {
+  i18next.init({
+    lng: 'en',
+    resources,
+  });
+
   const state = {
     form: {
       processState: 'filling',
@@ -162,4 +166,4 @@ export default () => i18next.init({
   });
 
   autoupdate(watchedState);
-});
+};
