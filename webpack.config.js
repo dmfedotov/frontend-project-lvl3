@@ -13,7 +13,6 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
     overlay: true,
-    open: true,
     hot: true,
   },
   plugins: [
